@@ -7,7 +7,7 @@
         <div class="collapse navbar-collapse">
             <ul class="navbar-nav ms-auto">
                 <li class="nav-item">
-                    <form action="{% url 'logout' %}" method="post">
+                    <form action="{% url 'users:logout' %}" method="post">
                         {% csrf_token %}
                         <button type="submit" class="btn btn-outline-light">Cerrar Sesión</button>
                     </form>

@@ -1,34 +1,58 @@
 # userpanel/views.py
 
-from django.shortcuts import render, get_object_or_404
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.views.generic import ListView, DetailView
 from banking.models import Account, Transaction
 
 
-@login_required
-def dashboard_view(request):
-    # 2. Busca todas las cuentas que pertenecen al usuario logueado.
-    # El 'related_name' que definimos como "cuentas" en el modelo nos sirve aquí.
-    user_accounts = request.user.cuentas.all()
+class DashboardView(LoginRequiredMixin, ListView):
+    """
+    Muestra el dashboard principal del socio con una lista de sus cuentas.
+    Hereda de ListView para manejar la lista de objetos automáticamente.
+    """
+    model = Account
+    template_name = 'userpanel/dashboard.html'
+    context_object_name = 'accounts'
 
-    # 3. Pasa las cuentas a la plantilla a través de un diccionario de contexto.
-    context = {
-        'accounts': user_accounts
-    }
+    def get_queryset(self):
+        """
+        Sobrescribe el metodo base para devolver solo las cuentas
+        que pertenecen al usuario actualmente autenticado.
+        """
+        # Usamos self.request.user para obtener el usuario logueado.
+        return Account.objects.filter(socio=self.request.user)
 
-    return render(request, 'userpanel/dashboard.html', context)
+    def get_context_data(self, **kwargs):
+        """
+        Añade el nombre completo del usuario al contexto para usarlo en la plantilla.
+        """
+        context = super().get_context_data(**kwargs)
+        context['full_name'] = self.request.user.get_full_name() or self.request.user.username
+        return context
 
 
-@login_required
-def account_detail_view(request, account_id):
-    account = get_object_or_404(Account, pk=account_id, socio=request.user)
+class AccountDetailView(LoginRequiredMixin, DetailView):
+    """
+    Muestra el detalle y el historial de transacciones de una cuenta específica.
+    Hereda de DetailView para manejar la obtención de un objeto único.
+    """
+    model = Account
+    template_name = 'userpanel/account_detail.html'
+    context_object_name = 'account'
 
-    # Ordenamos por fecha y luego por hora, ambos descendentes
-    transactions = account.transacciones.all().order_by('-fecha_transferencia', '-hora_transferencia')
+    def get_queryset(self):
+        """
+        Asegura que un usuario solo pueda acceder al detalle de sus propias cuentas.
+        Esta es una medida de seguridad crucial.
+        """
+        return Account.objects.filter(socio=self.request.user)
 
-    context = {
-        'account': account,
-        'transactions': transactions
-    }
-
-    return render(request, 'userpanel/account_detail.html', context)
+    def get_context_data(self, **kwargs):
+        """
+        Añade la lista de transacciones asociadas a la cuenta al contexto.
+        """
+        context = super().get_context_data(**kwargs)
+        # El objeto 'account' ya está en el contexto gracias a DetailView.
+        account = self.get_object()
+        context['transactions'] = account.transactions.all()
+        return context

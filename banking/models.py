@@ -6,30 +6,68 @@ from django.conf import settings
 
 class Account(models.Model):
     """
-    Representa una cuenta de ahorros de un socio. Un socio puede tener varias.
+    Representa una cuenta de ahorros de un socio.
+    La información de esta tabla es un espejo de los datos del sistema SAC.
     """
-    # El socio al que pertenece la cuenta.
-    socio = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="cuentas")
+    socio = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="accounts",
+        verbose_name="Socio"
+    )
+    account_number = models.CharField(
+        max_length=20,
+        unique=True,
+        verbose_name="Número de Cuenta"
+    )
+    cash_balance = models.DecimalField(
+        max_digits=12,
+        decimal_places=2,
+        default=0.00,
+        verbose_name="Saldo en Efectivo"
+    )
+    local_checks_balance = models.DecimalField(
+        max_digits=12,
+        decimal_places=2,
+        default=0.00,
+        verbose_name="Saldo en Cheques Locales"
+    )
+    internal_checks_balance = models.DecimalField(
+        max_digits=12,
+        decimal_places=2,
+        default=0.00,
+        verbose_name="Saldo en Cheques Propios"
+    )
+    reserve_balance = models.DecimalField(
+        max_digits=12,
+        decimal_places=2,
+        default=0.00,
+        verbose_name="Encaje",
+        help_text="Dinero bloqueado por encaje."
+    )
+    other_guarantees_balance = models.DecimalField(
+        max_digits=12,
+        decimal_places=2,
+        default=0.00,
+        verbose_name="Otras Garantías"
+    )
 
-    # Datos de la cuenta según el mapeo
-    numero_cuenta = models.CharField(max_length=20, unique=True)
-    saldo_efectivo = models.DecimalField(max_digits=12, decimal_places=2, default=0.00)
-    cheques_locales = models.DecimalField(max_digits=12, decimal_places=2, default=0.00)
-    cheques_propios = models.DecimalField(max_digits=12, decimal_places=2, default=0.00)
-    encaje = models.DecimalField(max_digits=12, decimal_places=2, default=0.00, help_text="Dinero bloqueado por encaje")
-    otras_garantias = models.DecimalField(max_digits=12, decimal_places=2, default=0.00)
+    class Meta:
+        verbose_name = "Cuenta"
+        verbose_name_plural = "Cuentas"
+        ordering = ['socio', 'account_number']
 
     def __str__(self):
-        return f'Cuenta {self.numero_cuenta} ({self.socio.username})'
+        return f'Cuenta {self.account_number} ({self.socio.username})'
 
 
 class Transaction(models.Model):
     """
     Representa un movimiento o transacción individual en una cuenta.
+    La información de esta tabla es un espejo de los datos del sistema SAC.
     """
 
-    # Enumeraciones para los campos con opciones fijas
-    class Tipo(models.TextChoices):
+    class TransactionType(models.TextChoices):
         INAH = 'INAH', 'INAH'
         ACCI = 'ACCI', 'ACCI'
         DEAH = 'DEAH', 'DEAH'
@@ -40,22 +78,53 @@ class Transaction(models.Model):
         DBAH = 'DBAH', 'DBAH'
         NCAH = 'NCAH', 'NCAH'
 
-    class Flujo(models.TextChoices):
-        INGRESO = 'I', 'Ingreso'
-        EGRESO = 'E', 'Egreso'
+    class FlowType(models.TextChoices):
+        INCOME = 'I', 'Ingreso'
+        OUTCOME = 'E', 'Egreso'
 
-    # La cuenta a la que pertenece esta transacción.
-    cuenta = models.ForeignKey(Account, on_delete=models.CASCADE, related_name="transacciones")
+    account = models.ForeignKey(
+        Account,
+        on_delete=models.CASCADE,
+        related_name="transactions",
+        verbose_name="Cuenta"
+    )
+    transaction_type = models.CharField(
+        max_length=4,
+        choices=TransactionType.choices,
+        verbose_name="Tipo de Transacción"
+    )
+    flow = models.CharField(
+        max_length=1,
+        choices=FlowType.choices,
+        verbose_name="Flujo",
+        help_text="Ingreso (I) o Egreso (E)"
+    )
+    transaction_date = models.DateField(verbose_name="Fecha de Transacción")
+    transaction_time = models.TimeField(verbose_name="Hora de Transacción")
+    amount = models.DecimalField(
+        max_digits=12,
+        decimal_places=2,
+        verbose_name="Monto"
+    )
+    cash_amount = models.DecimalField(
+        max_digits=12,
+        decimal_places=2,
+        verbose_name="Monto en Efectivo"
+    )
+    balance_after_transaction = models.DecimalField(
+        max_digits=12,
+        decimal_places=2,
+        verbose_name="Saldo Post-Transacción"
+    )
+    description = models.CharField(
+        max_length=255,
+        verbose_name="Detalle"
+    )
 
-    # Datos de la transacción
-    tipo_transferencia = models.CharField(max_length=4, choices=Tipo.choices)
-    flujo = models.CharField(max_length=1, choices=Flujo.choices, help_text="Ingreso (I) o Egreso (E)")
-    fecha_transferencia = models.DateField()
-    hora_transferencia = models.TimeField()
-    valor_transferencia = models.DecimalField(max_digits=12, decimal_places=2)
-    efectivo_transferencia = models.DecimalField(max_digits=12, decimal_places=2)
-    saldo_post_transferencia = models.DecimalField(max_digits=12, decimal_places=2)
-    detalle_transferencia = models.CharField(max_length=255)
+    class Meta:
+        verbose_name = "Transacción"
+        verbose_name_plural = "Transacciones"
+        ordering = ['-transaction_date', '-transaction_time']
 
     def __str__(self):
-        return f'Transacción de {self.valor_transferencia} en cuenta {self.cuenta.numero_cuenta}'
+        return f'Transacción de {self.amount} en {self.account.account_number}'

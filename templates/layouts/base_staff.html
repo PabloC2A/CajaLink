@@ -5,37 +5,38 @@
     <div class="d-flex flex-column flex-shrink-0 p-3 text-white bg-dark" style="width: 280px; min-height: 100vh;">
         <a href="{% url 'staffpanel:dashboard' %}"
            class="d-flex align-items-center mb-3 mb-md-0 me-md-auto text-white text-decoration-none">
-            <span class="fs-4">LOGO Staff</span>
+            <span class="fs-4">CajaLink Staff</span>
         </a>
         <hr>
         <ul class="nav nav-pills flex-column mb-auto">
             <li class="nav-item">
                 <a href="{% url 'staffpanel:dashboard' %}"
-                   class="nav-link text-white {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}">
-                    Dashboard
+                   class="nav-link text-white {% if request.resolver_match.app_name == 'staffpanel' and request.resolver_match.url_name == 'dashboard' %}active{% endif %}">
+                    <i class="bi bi-house-door me-2"></i>Dashboard
                 </a>
             </li>
             <li>
                 <a href="{% url 'staffpanel:user_list' %}"
-                   class="nav-link text-white {% if request.resolver_match.url_name == 'user_list' %}active{% endif %}">
-                    Usuarios
+                   class="nav-link text-white {% if request.resolver_match.app_name == 'staffpanel' and 'user' in request.resolver_match.url_name %}active{% endif %}">
+                    <i class="bi bi-people me-2"></i>Usuarios
                 </a>
             </li>
             <li>
-                <a href="{% url 'staffpanel:etl' %}"
-                   class="nav-link text-white {% if request.resolver_match.url_name == 'etl' %}active{% endif %}">
-                    ETL
+                <a href="{% url 'etl:upload' %}"
+                   class="nav-link text-white {% if request.resolver_match.app_name == 'etl' %}active{% endif %}">
+                    <i class="bi bi-cloud-upload me-2"></i>ETL
                 </a>
             </li>
         </ul>
         <hr>
-        <form action="{% url 'logout' %}" method="post" class="d-grid">
+        <form action="{% url 'users:logout' %}" method="post" class="d-grid">
             {% csrf_token %}
-            <button type="submit" class="btn btn-danger">Cerrar Sesión</button>
+            <button type="submit" class="btn btn-danger"><i class="bi bi-box-arrow-right me-2"></i>Cerrar Sesión
+            </button>
         </form>
     </div>
 
-    <div class="flex-grow-1 p-4">
+    <div class="flex-grow-1 p-4" style="overflow-y: auto;">
         {% block main_content %}{% endblock %}
     </div>
 </div>

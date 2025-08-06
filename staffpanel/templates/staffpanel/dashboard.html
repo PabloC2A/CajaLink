@@ -1,0 +1,53 @@
+{% extends "layouts/base_staff.html" %}
+
+{% block title %}Dashboard Staff - CajaLink{% endblock %}
+
+{% block main_content %}
+<h1 class="h2 border-bottom pb-2 mb-3">Dashboard</h1>
+
+<div class="row g-4">
+    <div class="col-md-6">
+        <div class="card text-center">
+            <div class="card-header">Total de Usuarios</div>
+            <div class="card-body">
+                <h2 class="card-title">{{ total_users }}</h2>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <div class="card text-center">
+            <div class="card-header">Socios Activos</div>
+            <div class="card-body">
+                <h2 class="card-title">{{ active_socios }}</h2>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">Últimas 5 Transferencias</div>
+            <div class="card-body">
+                <ul class="list-group list-group-flush">
+                    {% for tx in last_5_transactions %}
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <div>
+                            <strong>{{ tx.detalle_transferencia }}</strong>
+                            <small class="d-block text-muted">Cuenta: {{ tx.cuenta.numero_cuenta }}</small>
+                        </div>
+                        <span class="badge
+                                    {% if tx.flujo == 'E' %} bg-danger-subtle text-danger-emphasis {% else %} bg-success-subtle text-success-emphasis {% endif %}
+                                    rounded-pill fs-6">
+                                    ${{ tx.valor_transferencia|floatformat:2 }}
+                                </span>
+                    </li>
+                    {% empty %}
+                    <li class="list-group-item">No hay transacciones.</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

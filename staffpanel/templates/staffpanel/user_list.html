@@ -1,0 +1,97 @@
+{% extends "layouts/base_staff.html" %}
+
+{% block title %}Gestión de Usuarios - CajaLink{% endblock %}
+
+{% block main_content %}
+<h1 class="h2 border-bottom pb-2 mb-3">Gestión de Usuarios (Socios)</h1>
+
+<div class="card">
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                <tr>
+                    <th>Usuario</th>
+                    <th>Nombre Completo</th>
+                    <th>Email</th>
+                    <th>Estado</th>
+                    <th>Acciones</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for socio in socios %}
+                <tr>
+                    <td>{{ socio.username }}</td>
+                    <td>{{ socio.get_full_name }}</td>
+                    <td>{{ socio.email }}</td>
+                    <td>
+                        {% if socio.is_active %}
+                        <span class="badge bg-success">Activo</span>
+                        {% else %}
+                        <span class="badge bg-danger">Inactivo</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <button type="button" class="btn btn-sm btn-outline-info" data-bs-toggle="modal"
+                                data-bs-target="#userModal{{ socio.id }}">
+                            Ver
+                        </button>
+
+                        {% if socio.is_active %}
+                        <form action="{% url 'staffpanel:deactivate_user' socio.id %}" method="post" class="d-inline">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-sm btn-outline-danger">Desactivar</button>
+                        </form>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="5" class="text-center">No hay socios registrados.</td>
+                </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+{% for socio in socios %}
+<div class="modal fade" id="userModal{{ socio.id }}" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Detalles de {{ socio.username }}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <h6>Datos del Usuario</h6>
+                <ul>
+                    <li><strong>Nombre:</strong> {{ socio.get_full_name }}</li>
+                    <li><strong>Email:</strong> {{ socio.email }}</li>
+                    <li><strong>Cédula:</strong> {{ socio.profile.cedula }}</li>
+                    <li><strong>Usuario Activo:</strong> {{ socio.is_active|yesno:"Sí,No" }}</li>
+                    <li><strong>Fecha de Registro:</strong> {{ socio.date_joined|date:"d/m/Y" }}</li>
+                </ul>
+                <hr>
+                <h6>Cuentas Asociadas</h6>
+                {% for account in socio.cuentas.all %}
+                <div class="card mb-2">
+                    <div class="card-body">
+                        <p class="mb-1"><strong>Nro. Cuenta:</strong> {{ account.numero_cuenta }}</p>
+                        <p class="mb-0"><strong>Saldo:</strong> ${{ account.saldo_efectivo|floatformat:2 }}</p>
+                    </div>
+                </div>
+                {% empty %}
+                <p>Este socio no tiene cuentas registradas.</p>
+                {% endfor %}
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endfor %}
+
+{% endblock %}

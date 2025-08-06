@@ -1,0 +1,34 @@
+{% extends "layouts/base_socio.html" %}
+
+{% block title %}Mi Dashboard - CajaLink{% endblock %}
+
+{% block main_content %}
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2">Bienvenido, {{ user.get_full_name|default:user.username }}</h1>
+</div>
+
+<h2 class="h4">Resumen de Cuentas</h2>
+
+<div class="row mt-4">
+    {% for account in accounts %}
+    <div class="col-md-6 col-lg-4 mb-4">
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <h5 class="card-title">Cuenta de Ahorros</h5>
+                <p class="card-text text-muted">{{ account.numero_cuenta }}</p>
+                <h3 class="card-text">Saldo: ${{ account.saldo_efectivo|floatformat:2 }}</h3>
+                <a href="{% url 'userpanel:account_detail' account.id %}" class="btn btn-primary mt-2">Ver
+                    Movimientos</a>
+            </div>
+        </div>
+    </div>
+    {% empty %}
+    <div class="col">
+        <div class="alert alert-info">
+            Aún no tienes cuentas de ahorro registradas.
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+{% endblock %}

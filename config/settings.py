@@ -119,3 +119,12 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# URL a la que se redirige después de un inicio de sesión exitoso.
+LOGIN_REDIRECT_URL = '/users/redirect/'
+
+# URL a la que se redirige después de cerrar sesión.
+LOGOUT_REDIRECT_URL = '/accounts/login/'
+
+# URL de la página de inicio de sesión.
+LOGIN_URL = '/accounts/login/'

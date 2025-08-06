@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     'users.apps.UsersConfig',
     'banking.apps.BankingConfig',
     'staffpanel.apps.StaffpanelConfig',
+    'userpanel.apps.UserpanelConfig',
     'etl.apps.EtlConfig',
 ]
 
@@ -57,7 +58,7 @@ ROOT_URLCONF = 'config.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [BASE_DIR / 'templates'], #Plantilla globales
+        'DIRS': [BASE_DIR / 'templates'],  # Plantilla globales
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [

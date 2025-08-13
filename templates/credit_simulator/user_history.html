@@ -1,0 +1,72 @@
+{% extends "layouts/base_socio.html" %}
+
+{% block title %}Mi Historial de Simulaciones - CajaLink{% endblock %}
+
+{% block main_content %}
+    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+        <h1 class="h2">Mi Historial de Simulaciones</h1>
+        <div class="btn-toolbar mb-2 mb-md-0">
+            <a href="{% url 'userpanel:dashboard' %}" class="btn btn-outline-secondary me-2">
+                <i class="bi bi-house me-1"></i>Dashboard
+            </a>
+            <a href="{% url 'credit_simulator:simulation_form' %}" class="btn btn-success">
+                <i class="bi bi-calculator me-1"></i>Nueva Simulación
+            </a>
+        </div>
+    </div>
+
+    <div class="card shadow-sm">
+        <div class="card-body p-0">
+            {% if simulations %}
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead class="table-light">
+                        <tr>
+                            <th>Fecha</th>
+                            <th>Producto</th>
+                            <th>Monto</th>
+                            <th>Plazo</th>
+                            <th>Cuota Mensual</th>
+                            <th>Acciones</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for simulation in simulations %}
+                            <tr>
+                                <td>
+                                    <small>{{ simulation.created_at|date:"d/m/Y H:i" }}</small>
+                                </td>
+                                <td>{{ simulation.credit_product.commercial_name }}</td>
+                                <td>${{ simulation.requested_amount|floatformat:0 }}</td>
+                                <td>{{ simulation.term_months }} meses</td>
+                                <td class="fw-medium">${{ simulation.monthly_payment|floatformat:2 }}</td>
+                                <td>
+                                    <div class="btn-group btn-group-sm">
+                                        <a href="{% url 'credit_simulator:simulation_result_detail' simulation.id %}"
+                                           class="btn btn-outline-primary" title="Ver resultado">
+                                            <i class="bi bi-eye"></i>
+                                        </a>
+                                        <a href="{% url 'credit_simulator:amortization_schedule' simulation.id %}"
+                                           class="btn btn-outline-info" title="Tabla de amortización">
+                                            <i class="bi bi-table"></i>
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div class="text-center py-5">
+                    <i class="bi bi-clock-history display-1 text-muted"></i>
+                    <h4 class="mt-3">No has realizado simulaciones</h4>
+                    <p class="text-muted mb-4">Comienza simulando tu primer crédito.</p>
+                    <a href="{% url 'credit_simulator:simulation_form' %}" class="btn btn-success">
+                        <i class="bi bi-calculator me-2"></i>Mi Primera Simulación
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+{% endblock %}

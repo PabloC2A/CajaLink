@@ -25,6 +25,7 @@ INSTALLED_APPS = [
     'legacy_models.apps.LegacyModelsConfig',
     'userpanel.apps.UserpanelConfig',
     'staffpanel.apps.StaffpanelConfig',
+    'credit_simulator.apps.CreditSimulatorConfig',
     # Aplicaciones de Django
     'django.contrib.admin',
     'django.contrib.auth',
@@ -91,7 +92,7 @@ USE_I18N = True
 USE_TZ = True
 
 # --- Archivos Estáticos ---
-STATIC_URL = 'static/'
+STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 

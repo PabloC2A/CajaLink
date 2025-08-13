@@ -6,12 +6,16 @@ from django.contrib.auth.models import User
 from django.db.models import Q
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse_lazy
+from django.utils import timezone
 from django.views.generic import ListView, FormView, TemplateView
 from django.views import View
 
 from legacy_models.models import Socio, AhorroHistorial
 from users.services import create_web_user_for_socio
 from .forms import WebUserLinkForm
+
+# Importaciones para el simulador de créditos
+from credit_simulator.models import CreditProduct, CreditSimulation
 
 
 class StaffRequiredMixin(UserPassesTestMixin):
@@ -32,13 +36,29 @@ class StaffDashboardView(StaffRequiredMixin, TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        # Usando 'select_related' para optimizar la carga de datos del socio
+
+        # Estadísticas existentes
         last_5_transactions = AhorroHistorial.objects.select_related('cuenta')[:5]
 
+        # Estadísticas del simulador de créditos
+        today = timezone.now().date()
+        simulator_stats = {
+            'total_products': CreditProduct.objects.count(),
+            'active_products': CreditProduct.objects.filter(is_active=True).count(),
+            'total_simulations': CreditSimulation.objects.count(),
+            'recent_simulations': CreditSimulation.objects.filter(
+                created_at__date=today
+            ).count(),
+        }
+
         context.update({
+            # Datos existentes
             'total_web_users': User.objects.count(),
             'linked_socios': Socio.objects.filter(usersociolink__isnull=False).count(),
             'last_5_transactions': last_5_transactions,
+
+            # Nuevos datos del simulador
+            'simulator_stats': simulator_stats,
         })
         return context
 

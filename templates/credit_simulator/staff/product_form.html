@@ -1,0 +1,173 @@
+{% extends "layouts/base_staff.html" %}
+
+{% block title %}{{ title }} - CajaLink{% endblock %}
+
+{% block main_content %}
+    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+        <h1 class="h2">{{ title }}</h1>
+        <div class="btn-toolbar mb-2 mb-md-0">
+            <a href="{% url 'credit_simulator:staff_product_list' %}" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left me-1"></i>Volver a la Lista
+            </a>
+        </div>
+    </div>
+
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <form method="post" novalidate>
+                        {% csrf_token %}
+
+                        {% if form.non_field_errors %}
+                            <div class="alert alert-danger">
+                                {{ form.non_field_errors }}
+                            </div>
+                        {% endif %}
+
+                        <!-- Información básica -->
+                        <div class="row g-3 mb-4">
+                            <div class="col-12">
+                                <h5 class="border-bottom pb-2 mb-3">Información Básica</h5>
+                            </div>
+                            <div class="col-md-8">
+                                <label for="{{ form.commercial_name.id_for_label }}" class="form-label">
+                                    {{ form.commercial_name.label }} <span class="text-danger">*</span>
+                                </label>
+                                {{ form.commercial_name }}
+                                {% if form.commercial_name.errors %}
+                                    <div class="text-danger small">{{ form.commercial_name.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-4">
+                                <label for="{{ form.internal_code.id_for_label }}" class="form-label">
+                                    {{ form.internal_code.label }} <span class="text-danger">*</span>
+                                </label>
+                                {{ form.internal_code }}
+                                {% if form.internal_code.errors %}
+                                    <div class="text-danger small">{{ form.internal_code.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="col-12">
+                                <label for="{{ form.description.id_for_label }}" class="form-label">
+                                    {{ form.description.label }}
+                                </label>
+                                {{ form.description }}
+                                {% if form.description.errors %}
+                                    <div class="text-danger small">{{ form.description.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <!-- Parámetros financieros -->
+                        <div class="row g-3 mb-4">
+                            <div class="col-12">
+                                <h5 class="border-bottom pb-2 mb-3">Parámetros Financieros</h5>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="{{ form.minimum_amount.id_for_label }}" class="form-label">
+                                    {{ form.minimum_amount.label }} <span class="text-danger">*</span>
+                                </label>
+                                {{ form.minimum_amount }}
+                                {% if form.minimum_amount.errors %}
+                                    <div class="text-danger small">{{ form.minimum_amount.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-6">
+                                <label for="{{ form.maximum_amount.id_for_label }}" class="form-label">
+                                    {{ form.maximum_amount.label }} <span class="text-danger">*</span>
+                                </label>
+                                {{ form.maximum_amount }}
+                                {% if form.maximum_amount.errors %}
+                                    <div class="text-danger small">{{ form.maximum_amount.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-6">
+                                <label for="{{ form.minimum_term_months.id_for_label }}" class="form-label">
+                                    {{ form.minimum_term_months.label }} <span class="text-danger">*</span>
+                                </label>
+                                {{ form.minimum_term_months }}
+                                {% if form.minimum_term_months.errors %}
+                                    <div class="text-danger small">{{ form.minimum_term_months.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-6">
+                                <label for="{{ form.maximum_term_months.id_for_label }}" class="form-label">
+                                    {{ form.maximum_term_months.label }} <span class="text-danger">*</span>
+                                </label>
+                                {{ form.maximum_term_months }}
+                                {% if form.maximum_term_months.errors %}
+                                    <div class="text-danger small">{{ form.maximum_term_months.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-6">
+                                <label for="{{ form.annual_interest_rate.id_for_label }}" class="form-label">
+                                    {{ form.annual_interest_rate.label }} <span class="text-danger">*</span>
+                                </label>
+                                {{ form.annual_interest_rate }}
+                                {% if form.annual_interest_rate.errors %}
+                                    <div class="text-danger small">{{ form.annual_interest_rate.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-6">
+                                <label for="{{ form.amortization_type.id_for_label }}" class="form-label">
+                                    {{ form.amortization_type.label }} <span class="text-danger">*</span>
+                                </label>
+                                {{ form.amortization_type }}
+                                {% if form.amortization_type.errors %}
+                                    <div class="text-danger small">{{ form.amortization_type.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <!-- Seguro -->
+                        <div class="row g-3 mb-4">
+                            <div class="col-12">
+                                <h5 class="border-bottom pb-2 mb-3">Seguro de Desgravamen</h5>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-check form-switch">
+                                    {{ form.has_life_insurance }}
+                                    <label class="form-check-label" for="{{ form.has_life_insurance.id_for_label }}">
+                                        {{ form.has_life_insurance.label }}
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="{{ form.life_insurance_rate.id_for_label }}" class="form-label">
+                                    {{ form.life_insurance_rate.label }}
+                                </label>
+                                {{ form.life_insurance_rate }}
+                                {% if form.life_insurance_rate.errors %}
+                                    <div class="text-danger small">{{ form.life_insurance_rate.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <!-- Estado -->
+                        <div class="row g-3 mb-4">
+                            <div class="col-12">
+                                <div class="form-check form-switch">
+                                    {{ form.is_active }}
+                                    <label class="form-check-label" for="{{ form.is_active.id_for_label }}">
+                                        {{ form.is_active.label }}
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Botones -->
+                        <div class="d-flex gap-2">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-check-lg me-2"></i>{{ submit_text }}
+                            </button>
+                            <a href="{% url 'credit_simulator:staff_product_list' %}" class="btn btn-secondary">
+                                <i class="bi bi-x-lg me-2"></i>Cancelar
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

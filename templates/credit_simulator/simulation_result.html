@@ -1,0 +1,94 @@
+{% extends "layouts/base_socio.html" %}
+
+{% block title %}Resultado de Simulación - CajaLink{% endblock %}
+
+{% block main_content %}
+    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+        <h1 class="h2">Resultado de tu Simulación</h1>
+        <div class="btn-toolbar mb-2 mb-md-0">
+            <a href="{% url 'credit_simulator:simulation_form' %}" class="btn btn-outline-secondary me-2">
+                <i class="bi bi-arrow-left me-1"></i>Nueva Simulación
+            </a>
+            <a href="{% url 'userpanel:dashboard' %}" class="btn btn-outline-secondary">
+                <i class="bi bi-house me-1"></i>Dashboard
+            </a>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <!-- Información del producto -->
+        <div class="col-lg-4">
+            <div class="card shadow-sm">
+                <div class="card-header">
+                    <i class="bi bi-info-circle me-2"></i>Producto Simulado
+                </div>
+                <div class="card-body">
+                    <h5 class="card-title">{{ simulation.credit_product.commercial_name }}</h5>
+                    <ul class="list-unstyled">
+                        <li><strong>Monto:</strong> ${{ simulation.requested_amount|floatformat:2 }}</li>
+                        <li><strong>Plazo:</strong> {{ simulation.term_months }} meses</li>
+                        <li><strong>Tasa:</strong> {{ simulation.credit_product.annual_interest_rate }}% anual</li>
+                        <li><strong>Tipo:</strong> {{ simulation.credit_product.get_amortization_type_display }}</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Resultados de la simulación -->
+        <div class="col-lg-8">
+            <div class="card shadow-sm">
+                <div class="card-header">
+                    <i class="bi bi-calculator-fill me-2"></i>Resultados de la Simulación
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <div class="text-center">
+                                <h3 class="text-primary">${{ simulation.monthly_payment|floatformat:2 }}</h3>
+                                <p class="text-muted">Cuota Mensual</p>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="text-center">
+                                <h3 class="text-info">${{ simulation.total_amount|floatformat:2 }}</h3>
+                                <p class="text-muted">Total a Pagar</p>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="text-center">
+                                <h4 class="text-warning">${{ simulation.total_interest|floatformat:2 }}</h4>
+                                <p class="text-muted">Total Intereses</p>
+                            </div>
+                        </div>
+                        {% if simulation.total_life_insurance > 0 %}
+                            <div class="col-md-6">
+                                <div class="text-center">
+                                    <h4 class="text-secondary">${{ simulation.total_life_insurance|floatformat:2 }}</h4>
+                                    <p class="text-muted">Seguro de Desgravamen</p>
+                                </div>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Acciones -->
+            <div class="card shadow-sm mt-4">
+                <div class="card-body">
+                    <div class="d-flex gap-2 flex-wrap">
+                        <a href="{% url 'credit_simulator:amortization_schedule' simulation.id %}"
+                           class="btn btn-outline-primary">
+                            <i class="bi bi-table me-2"></i>Ver Tabla de Amortización
+                        </a>
+                        <a href="{% url 'credit_simulator:simulation_form' %}" class="btn btn-success">
+                            <i class="bi bi-calculator me-2"></i>Nueva Simulación
+                        </a>
+                        <a href="{% url 'credit_simulator:user_history' %}" class="btn btn-outline-secondary">
+                            <i class="bi bi-clock-history me-2"></i>Mi Historial
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

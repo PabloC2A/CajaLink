@@ -1,0 +1,202 @@
+{% extends "layouts/base_socio.html" %}
+
+{% block title %}Historial de Créditos - CajaLink{% endblock %}
+
+{% block main_content %}
+    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+        <h1 class="h2">Historial de Créditos</h1>
+        <div class="btn-toolbar mb-2 mb-md-0">
+            <a href="{% url 'credit_simulator:simulation_form' %}" class="btn btn-success">
+                <i class="bi bi-calculator-fill me-2"></i>Simular Nuevo Crédito
+            </a>
+        </div>
+    </div>
+
+    <!-- Estadísticas rápidas -->
+    <div class="row g-4 mb-4">
+        <div class="col-md-3">
+            <div class="card text-center h-100 shadow-sm">
+                <div class="card-body">
+                    <h3 class="text-primary">{{ total_credits }}</h3>
+                    <p class="card-text text-muted mb-0">Total Créditos</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-center h-100 shadow-sm">
+                <div class="card-body">
+                    <h3 class="text-success">{{ active_credits_count }}</h3>
+                    <p class="card-text text-muted mb-0">Activos</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-center h-100 shadow-sm">
+                <div class="card-body">
+                    <h3 class="text-info">{{ paid_credits_count }}</h3>
+                    <p class="card-text text-muted mb-0">Pagados</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-center h-100 shadow-sm">
+                <div class="card-body">
+                    <h3 class="text-warning">{{ user_simulations_count }}</h3>
+                    <p class="card-text text-muted mb-0">Simulaciones</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Simulador de créditos integration -->
+    {% if available_products_count > 0 %}
+        <div class="card shadow-sm mb-4">
+            <div class="card-header">
+                <i class="bi bi-calculator me-2"></i>Simular Nuevo Crédito
+            </div>
+            <div class="card-body">
+                <div class="row align-items-center">
+                    <div class="col-lg-8">
+                        <p class="card-text mb-2">
+                            Explora nuestros {{ available_products_count }} productos de crédito disponibles
+                            y encuentra la mejor opción para ti.
+                        </p>
+                        <div class="d-flex flex-wrap gap-1 mb-2">
+                            {% for product in recent_products %}
+                                <span class="badge bg-primary-subtle text-primary-emphasis">
+                                    {{ product.commercial_name }}
+                                </span>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    <div class="col-lg-4 text-lg-end">
+                        <div class="d-grid gap-2">
+                            <a href="{% url 'credit_simulator:simulation_form' %}" class="btn btn-success">
+                                <i class="bi bi-calculator-fill me-2"></i>Nueva Simulación
+                            </a>
+                            {% if user_simulations_count > 0 %}
+                                <a href="{% url 'credit_simulator:user_history' %}"
+                                   class="btn btn-outline-secondary btn-sm">
+                                    <i class="bi bi-clock-history me-1"></i>Ver Mis Simulaciones
+                                </a>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+
+    <!-- Lista de créditos -->
+    <div class="card shadow-sm">
+        <div class="card-header">
+            <i class="bi bi-credit-card me-2"></i>Mis Créditos
+        </div>
+        <div class="card-body p-0">
+            {% if credits %}
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead class="table-light">
+                        <tr>
+                            <th>Pagaré N°</th>
+                            <th>Fecha Préstamo</th>
+                            <th>Valor Préstamo</th>
+                            <th>Saldo Pendiente</th>
+                            <th>Estado</th>
+                            <th>Acciones</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for credit in credits %}
+                            <tr>
+                                <td>
+                                    <strong>{{ credit.num_paga }}</strong>
+                                </td>
+                                <td>
+                                    {% if credit.fech_pres %}
+                                        {{ credit.fech_pres|date:"d/m/Y" }}
+                                    {% else %}
+                                        <span class="text-muted">No registrada</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                        <span class="fw-medium">
+                                            ${{ credit.val_prest|default:0|floatformat:2 }}
+                                        </span>
+                                </td>
+                                <td>
+                                    {% if credit.sal_pre and credit.sal_pre > 0 %}
+                                        <span class="text-danger fw-medium">
+                                                ${{ credit.sal_pre|floatformat:2 }}
+                                            </span>
+                                    {% else %}
+                                        <span class="text-success">$0.00</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if credit.pagado %}
+                                        <span class="badge bg-success">Pagado</span>
+                                    {% elif credit.sal_pre and credit.sal_pre > 0 %}
+                                        <span class="badge bg-warning">Activo</span>
+                                    {% else %}
+                                        <span class="badge bg-secondary">Finalizado</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <a href="{% url 'userpanel:credito_detail' credit.pk %}"
+                                       class="btn btn-outline-primary btn-sm">
+                                        <i class="bi bi-eye me-1"></i>Ver Detalle
+                                    </a>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Paginación -->
+                {% if is_paginated %}
+                    <div class="card-footer">
+                        <nav aria-label="Navegación de créditos">
+                            <ul class="pagination justify-content-center mb-0">
+                                {% if page_obj.has_previous %}
+                                    <li class="page-item">
+                                        <a class="page-link" href="?page=1">Primera</a>
+                                    </li>
+                                    <li class="page-item">
+                                        <a class="page-link"
+                                           href="?page={{ page_obj.previous_page_number }}">Anterior</a>
+                                    </li>
+                                {% endif %}
+
+                                <li class="page-item active">
+                                    <span class="page-link">
+                                        Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}
+                                    </span>
+                                </li>
+
+                                {% if page_obj.has_next %}
+                                    <li class="page-item">
+                                        <a class="page-link" href="?page={{ page_obj.next_page_number }}">Siguiente</a>
+                                    </li>
+                                    <li class="page-item">
+                                        <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}">Última</a>
+                                    </li>
+                                {% endif %}
+                            </ul>
+                        </nav>
+                    </div>
+                {% endif %}
+            {% else %}
+                <div class="text-center py-5">
+                    <i class="bi bi-credit-card-2-front display-1 text-muted"></i>
+                    <h4 class="mt-3">No tienes créditos registrados</h4>
+                    <p class="text-muted mb-4">Simula tu primer crédito y conoce las condiciones disponibles.</p>
+                    <a href="{% url 'credit_simulator:simulation_form' %}" class="btn btn-success">
+                        <i class="bi bi-calculator-fill me-2"></i>Simular Mi Primer Crédito
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+{% endblock %}

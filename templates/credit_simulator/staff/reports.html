@@ -1,0 +1,98 @@
+{% extends "layouts/base_staff.html" %}
+
+{% block title %}Reportes del Simulador - CajaLink{% endblock %}
+
+{% block main_content %}
+    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+        <h1 class="h2">Reportes del Simulador</h1>
+        <div class="btn-toolbar mb-2 mb-md-0">
+            <a href="{% url 'credit_simulator:staff_dashboard' %}" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left me-1"></i>Volver al Panel
+            </a>
+        </div>
+    </div>
+
+    <!-- Estadísticas generales -->
+    <div class="row g-4 mb-4">
+        <div class="col-md-3">
+            <div class="card text-center shadow-sm">
+                <div class="card-body">
+                    <h3 class="text-primary">{{ total_simulations }}</h3>
+                    <p class="card-text text-muted">Total Simulaciones</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-center shadow-sm">
+                <div class="card-body">
+                    <h3 class="text-info">{{ total_users_with_simulations }}</h3>
+                    <p class="card-text text-muted">Usuarios Únicos</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-center shadow-sm">
+                <div class="card-body">
+                    <h3 class="text-success">{{ product_stats|length }}</h3>
+                    <p class="card-text text-muted">Productos Simulados</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-center shadow-sm">
+                <div class="card-body">
+                    <h3 class="text-warning">{{ monthly_simulations|length }}</h3>
+                    <p class="card-text text-muted">Meses con Actividad</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Estadísticas por producto -->
+    <div class="row g-4">
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-header">
+                    <i class="bi bi-bar-chart me-2"></i>Estadísticas por Producto
+                </div>
+                <div class="card-body p-0">
+                    {% if product_stats %}
+                        <div class="table-responsive">
+                            <table class="table table-hover mb-0">
+                                <thead class="table-light">
+                                <tr>
+                                    <th>Producto</th>
+                                    <th>Simulaciones</th>
+                                    <th>Monto Promedio</th>
+                                    <th>Monto Total</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                {% for product in product_stats %}
+                                    <tr>
+                                        <td>
+                                            <strong>{{ product.commercial_name }}</strong>
+                                            <div class="text-muted small">{{ product.internal_code }}</div>
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-primary">{{ product.simulation_count }}</span>
+                                        </td>
+                                        <td>${{ product.avg_amount|floatformat:0|default:0 }}</td>
+                                        <td>${{ product.total_amount|floatformat:0|default:0 }}</td>
+                                    </tr>
+                                {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="text-center py-4">
+                            <i class="bi bi-bar-chart display-4 text-muted"></i>
+                            <h5 class="mt-3">No hay datos disponibles</h5>
+                            <p class="text-muted">Los reportes aparecerán cuando se realicen simulaciones.</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

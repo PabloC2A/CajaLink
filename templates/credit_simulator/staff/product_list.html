@@ -1,0 +1,156 @@
+{% extends "layouts/base_staff.html" %}
+
+{% block title %}Productos de Crédito - CajaLink{% endblock %}
+
+{% block main_content %}
+    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+        <h1 class="h2">Productos de Crédito</h1>
+        <div class="btn-toolbar mb-2 mb-md-0">
+            <a href="{% url 'credit_simulator:staff_dashboard' %}" class="btn btn-outline-secondary me-2">
+                <i class="bi bi-arrow-left me-1"></i>Panel Simulador
+            </a>
+            <a href="{% url 'credit_simulator:staff_product_create' %}" class="btn btn-success">
+                <i class="bi bi-plus-lg me-1"></i>Nuevo Producto
+            </a>
+        </div>
+    </div>
+
+    <!-- Estadísticas rápidas -->
+    <div class="row g-3 mb-4">
+        <div class="col-md-4">
+            <div class="card text-center shadow-sm">
+                <div class="card-body py-3">
+                    <h4 class="text-primary">{{ stats.total_products }}</h4>
+                    <small class="text-muted">Total Productos</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card text-center shadow-sm">
+                <div class="card-body py-3">
+                    <h4 class="text-success">{{ stats.active_products }}</h4>
+                    <small class="text-muted">Activos</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card text-center shadow-sm">
+                <div class="card-body py-3">
+                    <h4 class="text-info">{{ stats.total_simulations }}</h4>
+                    <small class="text-muted">Simulaciones</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filtros -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-header">
+            <i class="bi bi-funnel me-2"></i>Filtros de Búsqueda
+        </div>
+        <div class="card-body">
+            <form method="get" class="row g-3">
+                <div class="col-md-3">
+                    {{ filter_form.search }}
+                </div>
+                <div class="col-md-2">
+                    {{ filter_form.amortization_type }}
+                </div>
+                <div class="col-md-2">
+                    {{ filter_form.is_active }}
+                </div>
+                <div class="col-md-2">
+                    {{ filter_form.min_amount }}
+                </div>
+                <div class="col-md-2">
+                    {{ filter_form.max_amount }}
+                </div>
+                <div class="col-md-1">
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="bi bi-search"></i>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Lista de productos -->
+    <div class="card shadow-sm">
+        <div class="card-body p-0">
+            {% if products %}
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead class="table-light">
+                        <tr>
+                            <th>Producto</th>
+                            <th>Código</th>
+                            <th>Monto</th>
+                            <th>Plazo</th>
+                            <th>Tasa</th>
+                            <th>Estado</th>
+                            <th>Acciones</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for product in products %}
+                            <tr>
+                                <td>
+                                    <strong>{{ product.commercial_name }}</strong>
+                                    {% if product.description %}
+                                        <div class="text-muted small">{{ product.description|truncatechars:50 }}</div>
+                                    {% endif %}
+                                </td>
+                                <td><code>{{ product.internal_code }}</code></td>
+                                <td>
+                                    <small class="text-muted">
+                                        ${{ product.minimum_amount|floatformat:0 }} -<br>
+                                        ${{ product.maximum_amount|floatformat:0 }}
+                                    </small>
+                                </td>
+                                <td>
+                                    <small class="text-muted">
+                                        {{ product.minimum_term_months }} - {{ product.maximum_term_months }} meses
+                                    </small>
+                                </td>
+                                <td>
+                                        <span class="badge bg-info-subtle text-info-emphasis">
+                                            {{ product.annual_interest_rate }}%
+                                        </span>
+                                </td>
+                                <td>
+                                    {% if product.is_active %}
+                                        <span class="badge bg-success">Activo</span>
+                                    {% else %}
+                                        <span class="badge bg-secondary">Inactivo</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <div class="btn-group btn-group-sm">
+                                        <a href="{% url 'credit_simulator:staff_product_detail' product.pk %}"
+                                           class="btn btn-outline-primary" title="Ver">
+                                            <i class="bi bi-eye"></i>
+                                        </a>
+                                        <a href="{% url 'credit_simulator:staff_product_update' product.pk %}"
+                                           class="btn btn-outline-warning" title="Editar">
+                                            <i class="bi bi-pencil"></i>
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div class="text-center py-5">
+                    <i class="bi bi-collection display-1 text-muted"></i>
+                    <h4 class="mt-3">No hay productos de crédito</h4>
+                    <p class="text-muted mb-4">Comienza creando tu primer producto.</p>
+                    <a href="{% url 'credit_simulator:staff_product_create' %}" class="btn btn-success">
+                        <i class="bi bi-plus-lg me-2"></i>Crear Primer Producto
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+{% endblock %}

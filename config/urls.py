@@ -16,6 +16,9 @@ urlpatterns = [
     # Dirige todas las URLs que empiezan con 'dashboard/' a la app 'userpanel'
     path('dashboard/', include('userpanel.urls')),
 
+    # URLs de la aplicación de simulador de créditos
+    path('simulador/', include('credit_simulator.urls')),
+
     # Dirige todas las URLs que empiezan con 'staff/' a la app 'staffpanel'
     path('staff/', include('staffpanel.urls')),
 

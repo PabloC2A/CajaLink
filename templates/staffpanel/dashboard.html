@@ -1,0 +1,56 @@
+{% extends "layouts/base_staff.html" %}
+
+{% block title %}Dashboard Staff - CajaLink{% endblock %}
+
+{% block main_content %}
+    <h1 class="h2 border-bottom pb-2 mb-3">Dashboard</h1>
+
+    <div class="row g-4">
+        <div class="col-md-6">
+            <div class="card text-center h-100 shadow-sm">
+                <div class="card-header"><i class="bi bi-people-fill me-2"></i>Usuarios Web Totales</div>
+                <div class="card-body">
+                    <h2 class="card-title">{{ total_web_users }}</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card text-center h-100 shadow-sm">
+                <div class="card-header"><i class="bi bi-link-45deg me-2"></i>Socios Vinculados a la Web</div>
+                <div class="card-body">
+                    <h2 class="card-title">{{ linked_socios }}</h2>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-header"><i class="bi bi-arrow-down-up me-2"></i>Últimas 5 Transacciones del Sistema
+                </div>
+                <div class="card-body p-0">
+                    <ul class="list-group list-group-flush">
+                        {% for tx in last_5_transactions %}
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                <div>
+                                    <strong>{{ tx.description }}</strong>
+                                    <small class="d-block text-muted">
+                                        Socio: {{ tx.account.socio.nombres }} {{ tx.account.socio.apellidos }} |
+                                        Cuenta: {{ tx.account.account_number }}
+                                    </small>
+                                </div>
+                                <span class="badge
+                                    {% if tx.flow == tx.FlowType.OUTCOME %} bg-danger-subtle text-danger-emphasis {% else %} bg-success-subtle text-success-emphasis {% endif %}
+                                    rounded-pill fs-6">
+                                    ${{ tx.amount|floatformat:2 }}
+                                </span>
+                            </li>
+                        {% empty %}
+                            <li class="list-group-item text-center p-3">No hay transacciones recientes en el sistema.
+                            </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

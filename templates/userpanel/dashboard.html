@@ -1,0 +1,100 @@
+{% extends "layouts/base_socio.html" %}
+
+{% block title %}Mi Dashboard - CajaLink{% endblock %}
+
+{% block main_content %}
+    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+        <h1 class="h2">Bienvenido, {{ full_name }}</h1>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-header fs-5 fw-medium"><i class="bi bi-wallet2 me-2"></i>Cuenta de Ahorros</div>
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center flex-wrap">
+                        <div>
+                            <p class="card-text text-muted mb-1">Cuenta N°: {{ socio.cuenta }}</p>
+                            <h3 class="card-title mb-0">Saldo: ${{ socio.efectivo|floatformat:2 }}</h3>
+                        </div>
+                        <a href="{% url 'userpanel:ahorro_historial' %}" class="btn btn-primary mt-2 mt-md-0">
+                            <i class="bi bi-card-list me-1"></i> Ver Movimientos
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {% if socio.certifica > 0 %}
+            <div class="col-12">
+                <div class="card shadow-sm">
+                    <div class="card-header fs-5 fw-medium"><i class="bi bi-patch-check-fill me-2"></i>Certificados de
+                        Aportación
+                    </div>
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center flex-wrap">
+                            <div>
+                                <p class="card-text text-muted mb-1">Cuenta N°: {{ socio.cuenta }}</p>
+                                <h3 class="card-title mb-0">Saldo: ${{ socio.certifica|floatformat:2 }}</h3>
+                            </div>
+                            <a href="{% url 'userpanel:certificado_historial' %}" class="btn btn-primary mt-2 mt-md-0">
+                                <i class="bi bi-card-list me-1"></i> Ver Movimientos
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+
+        {% if credits_with_details %}
+            <div class="col-12">
+                <div class="card shadow-sm">
+                    <div class="card-header fs-5 fw-medium"><i class="bi bi-credit-card me-2"></i>Créditos Vigentes
+                    </div>
+                    <div class="card-body p-0">
+                        <ul class="list-group list-group-flush">
+                            {% for item in credits_with_details %}
+                                <li class="list-group-item">
+                                    <div class="row align-items-center g-3">
+                                        <div class="col-lg-4 col-md-6">
+                                            <strong>Pagaré N°: {{ item.credit.num_paga }}</strong>
+                                            <div class="text-muted">Saldo:
+                                                ${{ item.credit.sal_pre|floatformat:2 }}</div>
+                                        </div>
+                                        <div class="col-lg-4 col-md-6">
+                                            {% if item.overdue_installment %}
+                                                <strong class="text-danger">
+                                                    <i class="bi bi-exclamation-triangle-fill me-1"></i>Cuota Vencida:
+                                                    ${{ item.overdue_installment.pagar|floatformat:2 }}
+                                                </strong>
+                                                <div class="text-muted">
+                                                    Venció: {{ item.overdue_installment.fecha_ven|date:"d/m/Y" }}</div>
+
+                                            {% elif item.next_installment %}
+                                                <strong>
+                                                    <i class="bi bi-calendar-event me-1"></i>Próxima Cuota:
+                                                    ${{ item.next_installment.pagar|floatformat:2 }}
+                                                </strong>
+                                                <div class="text-muted">
+                                                    Vence: {{ item.next_installment.fecha_ven|date:"d/m/Y" }}</div>
+
+                                            {% else %}
+                                                <span class="text-success">
+                                                    <i class="bi bi-check-circle-fill me-1"></i>Crédito sin cuotas pendientes.
+                                                </span>
+                                            {% endif %}
+                                        </div>
+                                        <div class="col-lg-4 col-md-12 text-lg-end">
+                                            <a href="{% url 'userpanel:credito_detail' item.credit.pk %}"
+                                               class="btn btn-outline-primary w-100 w-lg-auto">Ver Detalle de Cuotas</a>
+                                        </div>
+                                    </div>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+{% endblock %}

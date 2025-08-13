@@ -4,14 +4,10 @@ from django.urls import path
 from django.contrib.auth.views import LoginView, LogoutView, PasswordChangeDoneView
 from .views import CustomPasswordChangeView, redirect_after_login
 
-# El app_name es crucial para que Django sepa que estas URLs pertenecen a 'users'
 app_name = 'users'
 
 urlpatterns = [
-    # Vista de redirección post-login
-    path('redirect/', redirect_after_login, name='redirect_after_login'),
-
-    # Vistas de autenticación
+    path('redirect/', redirect_after_login, name='post_login_redirect'),
     path(
         'login/',
         LoginView.as_view(template_name='registration/login.html'),

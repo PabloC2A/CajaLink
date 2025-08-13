@@ -1,0 +1,79 @@
+{% extends "layouts/base_socio.html" %}
+
+{% block title %}Detalle de Crédito - CajaLink{% endblock %}
+
+{% block main_content %}
+    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+        <h1 class="h2"><i class="bi bi-journal-text me-2"></i>Detalle de Crédito</h1>
+        <a href="{% url 'userpanel:dashboard' %}" class="btn btn-sm btn-outline-secondary">
+            <i class="bi bi-arrow-left me-1"></i> Volver al Dashboard
+        </a>
+    </div>
+
+    <div class="card mb-4 shadow-sm">
+        <div class="card-header">
+            <strong>Pagaré N°:</strong> {{ credit.num_paga }}
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-4">
+                    <h5 class="card-title">Saldo Actual</h5>
+                    <p class="card-text fs-2 fw-bold">${{ credit.sal_pre|floatformat:2 }}</p>
+                </div>
+                <div class="col-md-4">
+                    <h5 class="card-title">Monto Original</h5>
+                    <p class="card-text fs-4">${{ credit.val_prest|floatformat:2 }}</p>
+                </div>
+                <div class="col-md-4">
+                    <h5 class="card-title">Tasa de Interés</h5>
+                    <p class="card-text fs-4">{{ credit.tasa }}%</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <h2 class="h4">Tabla de Amortización (Cuotas)</h2>
+    <div class="table-responsive">
+        <table class="table table-striped table-hover">
+            <thead class="table-light">
+            <tr>
+                <th scope="col">N° Cuota</th>
+                <th scope="col">Fecha Vencimiento</th>
+                <th scope="col" class="text-end">Capital</th>
+                <th scope="col" class="text-end">Interés</th>
+                <th scope="col" class="text-end">Total a Pagar</th>
+                <th scope="col" class="text-center">Estado</th>
+            </tr>
+            </thead>
+            <tbody>
+
+            {% for installment in installments_paid %}
+                <tr>
+                    <td>{{ installment.ncuota }}</td>
+                    <td>{{ installment.fecha_ven|date:"d/m/Y" }}</td>
+                    <td class="text-end">${{ installment.capital|floatformat:2 }}</td>
+                    <td class="text-end">${{ installment.interes|floatformat:2 }}</td>
+                    <td class="text-end fw-bold">${{ installment.pagar|floatformat:2 }}</td>
+                    <td class="text-center">
+                        <span class="badge bg-success-subtle text-success-emphasis">Pagada</span>
+                    </td>
+                </tr>
+            {% endfor %}
+
+            {% if next_installment %}
+                <tr>
+                    <td>{{ next_installment.ncuota }}</td>
+                    <td>{{ next_installment.fecha_ven|date:"d/m/Y" }}</td>
+                    <td class="text-end">${{ next_installment.capital|floatformat:2 }}</td>
+                    <td class="text-end">${{ next_installment.interes|floatformat:2 }}</td>
+                    <td class="text-end fw-bold">${{ next_installment.pagar|floatformat:2 }}</td>
+                    <td class="text-center">
+                        <span class="badge bg-warning-subtle text-warning-emphasis">Pendiente (Siguiente)</span>
+                    </td>
+                </tr>
+            {% endif %}
+            </tbody>
+        </table>
+    </div>
+
+{% endblock %}

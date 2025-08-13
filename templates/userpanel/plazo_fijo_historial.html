@@ -1,0 +1,222 @@
+<!-- userpanel/templates/userpanel/plazo_fijo_historial.html -->
+{% extends "layouts/base_socio.html" %}
+
+{% block title %}Historial Plazos Fijos - CajaLink{% endblock %}
+
+{% block main_content %}
+    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+        <div>
+            <h1 class="h2">
+                <i class="bi bi-clock-history me-2 text-primary"></i>
+                Historial de Plazos Fijos
+            </h1>
+            <p class="text-muted mb-0">Cuenta N°: {{ socio.cuenta }}</p>
+        </div>
+        <div class="btn-toolbar">
+            <a href="{% url 'userpanel:plazo_fijo_list' %}" class="btn btn-outline-primary me-2">
+                <i class="bi bi-calendar-check me-1"></i>Ver Plazos Fijos
+            </a>
+            <a href="{% url 'userpanel:dashboard' %}" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left me-1"></i>Volver al Dashboard
+            </a>
+        </div>
+    </div>
+
+    <!-- Resumen de Transacciones -->
+    <div class="row g-4 mb-4">
+        <div class="col-md-6">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-shrink-0">
+                            <div class="bg-success bg-opacity-10 rounded-3 p-3">
+                                <i class="bi bi-arrow-down-circle text-success fs-3"></i>
+                            </div>
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <h6 class="card-subtitle text-muted mb-1">Total Depósitos</h6>
+                            <h3 class="card-title mb-0 text-success">${{ total_depositos|floatformat:2 }}</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-shrink-0">
+                            <div class="bg-primary bg-opacity-10 rounded-3 p-3">
+                                <i class="bi bi-percent text-primary fs-3"></i>
+                            </div>
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <h6 class="card-subtitle text-muted mb-1">Total Intereses</h6>
+                            <h3 class="card-title mb-0 text-primary">${{ total_intereses|floatformat:2 }}</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Historial de Transacciones -->
+    <div class="card shadow-sm">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">
+                <i class="bi bi-list-ul me-2"></i>
+                Historial de Movimientos
+            </h5>
+            {% if transactions %}
+                <span class="badge bg-primary">{{ page_obj.paginator.count }} transacciones</span>
+            {% endif %}
+        </div>
+
+        {% if transactions %}
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover table-striped mb-0">
+                        <thead class="table-light">
+                        <tr>
+                            <th scope="col">Fecha</th>
+                            <th scope="col">Documento</th>
+                            <th scope="col">Cliente</th>
+                            <th scope="col">Tipo</th>
+                            <th scope="col" class="text-end">Cantidad</th>
+                            <th scope="col" class="text-end">Interés</th>
+                            <th scope="col" class="text-end">Impuesto</th>
+                            <th scope="col" class="text-center">Estado</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for transaction in transactions %}
+                            <tr>
+                                <td>
+                                    <strong>{{ transaction.fechadepos|date:"d/m/Y" }}</strong>
+                                    {% if transaction.hora %}
+                                        <div class="text-muted small">{{ transaction.hora }}</div>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if transaction.documento %}
+                                        <a href="{% url 'userpanel:plazo_fijo_detail' transaction.documento.documento %}"
+                                           class="text-decoration-none">
+                                            <strong>{{ transaction.documento.documento }}</strong>
+                                        </a>
+                                    {% else %}
+                                        <span class="text-muted">-</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {{ transaction.cliente|default:"-"|truncatechars:25 }}
+                                </td>
+                                <td>
+                                    {% if transaction.tipo_tra %}
+                                        <span class="badge {% if 'DEP' in transaction.tipo_tra.upper %}bg-success{% elif 'RET' in transaction.tipo_tra.upper or 'PAG' in transaction.tipo_tra.upper %}bg-info{% else %}bg-secondary{% endif %}">
+                                                {{ transaction.tipo_tra }}
+                                            </span>
+                                    {% else %}
+                                        <span class="text-muted">-</span>
+                                    {% endif %}
+                                </td>
+                                <td class="text-end">
+                                    {% if transaction.cantidad %}
+                                        <span class="fw-medium text-primary">${{ transaction.cantidad|floatformat:2 }}</span>
+                                    {% else %}
+                                        <span class="text-muted">-</span>
+                                    {% endif %}
+                                </td>
+                                <td class="text-end">
+                                    {% if transaction.interes %}
+                                        <span class="fw-medium text-success">${{ transaction.interes|floatformat:2 }}</span>
+                                    {% else %}
+                                        <span class="text-muted">-</span>
+                                    {% endif %}
+                                </td>
+                                <td class="text-end">
+                                    {% if transaction.impuesto %}
+                                        <span class="fw-medium text-danger">${{ transaction.impuesto|floatformat:2 }}</span>
+                                    {% else %}
+                                        <span class="text-muted">-</span>
+                                    {% endif %}
+                                </td>
+                                <td class="text-center">
+                                    {% if transaction.contabili %}
+                                        <i class="bi bi-check-circle-fill text-success" title="Contabilizado"></i>
+                                    {% else %}
+                                        <i class="bi bi-clock text-warning" title="Pendiente"></i>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Paginación -->
+            {% if is_paginated %}
+                <div class="card-footer bg-light">
+                    <nav aria-label="Navegación de páginas">
+                        <ul class="pagination pagination-sm justify-content-center mb-0">
+                            {% if page_obj.has_previous %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page=1">
+                                        <i class="bi bi-chevron-double-left"></i>
+                                    </a>
+                                </li>
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ page_obj.previous_page_number }}">
+                                        <i class="bi bi-chevron-left"></i>
+                                    </a>
+                                </li>
+                            {% endif %}
+
+                            {% for num in page_obj.paginator.page_range %}
+                                {% if page_obj.number == num %}
+                                    <li class="page-item active">
+                                        <span class="page-link">{{ num }}</span>
+                                    </li>
+                                {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                                    <li class="page-item">
+                                        <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+                                    </li>
+                                {% endif %}
+                            {% endfor %}
+
+                            {% if page_obj.has_next %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ page_obj.next_page_number }}">
+                                        <i class="bi bi-chevron-right"></i>
+                                    </a>
+                                </li>
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}">
+                                        <i class="bi bi-chevron-double-right"></i>
+                                    </a>
+                                </li>
+                            {% endif %}
+                        </ul>
+                    </nav>
+
+                    <div class="text-center mt-2">
+                        <small class="text-muted">
+                            Mostrando {{ page_obj.start_index }} - {{ page_obj.end_index }}
+                            de {{ page_obj.paginator.count }} transacciones
+                        </small>
+                    </div>
+                </div>
+            {% endif %}
+
+        {% else %}
+            <div class="card-body text-center py-5">
+                <div class="mb-3">
+                    <i class="bi bi-inbox display-4 text-muted"></i>
+                </div>
+                <h5 class="text-muted">No hay transacciones registradas</h5>
+                <p class="text-muted mb-0">Aún no se han registrado transacciones de plazos fijos.</p>
+            </div>
+        {% endif %}
+    </div>
+{% endblock %}

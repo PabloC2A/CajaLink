@@ -5,26 +5,27 @@ from pathlib import Path
 from decouple import config
 import dj_database_url
 
+# --- Rutas Base ---
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+# --- Configuración de Seguridad y Entorno ---
 SECRET_KEY = config('SECRET_KEY')
+
+# DEBUG es True solo si se especifica en el .env, de lo contrario es False (seguro por defecto)
 DEBUG = config('DEBUG', default=False, cast=bool)
 
-# <--- HOSTS PERMITIDOS ---
-# Lee el host de Render desde las variables de entorno.
-ALLOWED_HOSTS = [config('RENDER_EXTERNAL_HOSTNAME', default=None)]
-# Si estamos en desarrollo (DEBUG=True), permite el host local.
-if DEBUG:
-    ALLOWED_HOSTS.append('127.0.0.1')
+# Lee los hosts permitidos como una lista separada por comas
+ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='127.0.0.1').split(',')
 
+# --- Aplicaciones ---
 INSTALLED_APPS = [
     # Mis Aplicaciones
+    'core.apps.CoreConfig',
     'users.apps.UsersConfig',
-    'banking.apps.BankingConfig',
-    'staffpanel.apps.StaffpanelConfig',
-    'etl.apps.EtlConfig',
+    'legacy_models.apps.LegacyModelsConfig',
     'userpanel.apps.UserpanelConfig',
-    # Django Apps
+    'staffpanel.apps.StaffpanelConfig',
+    # Aplicaciones de Django
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -33,8 +34,10 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
 ]
 
+# --- Middleware ---
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    # WhiteNoise para servir archivos estáticos eficientemente en producción
     'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -45,6 +48,7 @@ MIDDLEWARE = [
     'users.middleware.ForcePasswordChangeMiddleware',
 ]
 
+# --- URLs y Plantillas ---
 ROOT_URLCONF = 'config.urls'
 TEMPLATES = [
     {
@@ -61,17 +65,18 @@ TEMPLATES = [
         },
     },
 ]
-
 WSGI_APPLICATION = 'config.wsgi.application'
 
-# <--- BASE DE DATOS FLEXIBLE ---
+# --- Base de Datos ---
+# Usa la DATABASE_URL de Render en producción, o un archivo SQLite local por defecto.
 DATABASES = {
     'default': dj_database_url.config(
-        default=f"sqlite:///{BASE_DIR / 'db.sqlite3'}",
+        default=config('DATABASE_URL'),  # Lee la URL del .env
         conn_max_age=600
     )
 }
 
+# --- Validación de Contraseñas ---
 AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},
     {'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator'},
@@ -79,18 +84,28 @@ AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator'},
 ]
 
+# --- Internacionalización ---
 LANGUAGE_CODE = 'es-ec'
 TIME_ZONE = 'America/Guayaquil'
 USE_I18N = True
 USE_TZ = True
 
-# <--- ARCHIVOS ESTÁTICOS PARA PRODUCCIÓN ---
+# --- Archivos Estáticos ---
 STATIC_URL = 'static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
+# --- Configuración General ---
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-
 LOGIN_REDIRECT_URL = '/accounts/redirect/'
 LOGOUT_REDIRECT_URL = '/accounts/login/'
 LOGIN_URL = '/accounts/login/'
+
+# --- CONFIGURACIÓN ADICIONAL PARA PRODUCCIÓN ---
+if not DEBUG:
+    SECURE_SSL_REDIRECT = True
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+    SECURE_HSTS_SECONDS = 31536000  # 1 año
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+    SECURE_HSTS_PRELOAD = True

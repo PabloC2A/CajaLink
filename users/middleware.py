@@ -2,10 +2,15 @@
 
 from django.shortcuts import redirect
 from django.urls import reverse
-from users.models import Profile
+from .models import UserSocioLink
 
 
 class ForcePasswordChangeMiddleware:
+    """
+    Este middleware comprueba si el usuario autenticado necesita cambiar su
+    contraseña y lo redirige si es necesario.
+    """
+
     def __init__(self, get_response):
         self.get_response = get_response
 
@@ -14,14 +19,13 @@ class ForcePasswordChangeMiddleware:
 
         if request.user.is_authenticated and not request.user.is_superuser:
             try:
-                profile = request.user.profile
-                # CORRECCIÓN AQUÍ: Usamos el nombre completo de la URL 'users:password_change'
+                link = request.user.link
                 password_change_url = reverse('users:password_change')
 
-                if profile.debe_cambiar_password and request.path != password_change_url:
-                    # CORRECCIÓN AQUÍ: Redirigimos al nombre completo de la URL
-                    return redirect('users:password_change')
-            except Profile.DoesNotExist:
+                if link.must_change_password and request.path != password_change_url:
+                    return redirect(password_change_url)
+            except UserSocioLink.DoesNotExist:
+                # Si no hay vínculo, no se aplica la regla.
                 pass
 
         return response

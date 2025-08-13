@@ -1,0 +1,46 @@
+{% extends "layouts/base_public.html" %}
+
+{% block title %}Bienvenido a CajaLink{% endblock %}
+
+{% block main_content %}
+    <div class="bg-primary text-white text-center py-5">
+        <div class="container">
+            <h1 class="display-4 fw-bold">Bienvenido a CajaLink</h1>
+            <p class="lead col-lg-8 mx-auto">Tu portal digital para consultar los productos y servicios de tu
+                cooperativa. Accede a tu información de forma fácil, rápida y segura.</p>
+        </div>
+    </div>
+
+    <div class="container py-5">
+        <div class="row text-center">
+            <div class="col-md-4 mb-4">
+                <div class="card h-100 shadow-sm">
+                    <div class="card-body">
+                        <i class="bi bi-shield-check display-3 text-primary"></i>
+                        <h3 class="card-title mt-3">Seguro</h3>
+                        <p class="card-text">Tu información financiera está protegida con los más altos estándares de
+                            seguridad.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-4">
+                <div class="card h-100 shadow-sm">
+                    <div class="card-body">
+                        <i class="bi bi-speedometer2 display-3 text-primary"></i>
+                        <h3 class="card-title mt-3">Rápido</h3>
+                        <p class="card-text">Consulta tus saldos y movimientos en tiempo real, sin esperas.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-4">
+                <div class="card h-100 shadow-sm">
+                    <div class="card-body">
+                        <i class="bi bi-phone display-3 text-primary"></i>
+                        <h3 class="card-title mt-3">Accesible</h3>
+                        <p class="card-text">Accede a tu información desde cualquier lugar y en cualquier momento.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

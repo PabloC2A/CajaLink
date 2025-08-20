@@ -1,20 +1,15 @@
 <!-- userpanel/templates/userpanel/certificado_historial.html -->
 {% extends "layouts/base_socio.html" %}
 
-{% block title %}Historial de Certificados - CajaLink{% endblock %}
+{% block title %}Certificados - CajaLink{% endblock %}
 
 {% block main_content %}
     <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
         <div>
             <h1 class="h2">
-                <i class="bi bi-patch-check-fill me-2 text-primary"></i>
-                Historial de Certificados de Aportación
+                Certificados de Aportación
             </h1>
-            <p class="text-muted mb-0">Cuenta N°: {{ socio.cuenta }}</p>
         </div>
-        <a href="{% url 'userpanel:dashboard' %}" class="btn btn-outline-secondary">
-            <i class="bi bi-arrow-left me-1"></i>Volver al Dashboard
-        </a>
     </div>
 
     <!-- Resumen de la Cuenta -->
@@ -23,11 +18,6 @@
             <div class="card shadow-sm">
                 <div class="card-body">
                     <div class="d-flex align-items-center">
-                        <div class="flex-shrink-0">
-                            <div class="bg-primary bg-opacity-10 rounded-3 p-3">
-                                <i class="bi bi-patch-check-fill text-primary fs-3"></i>
-                            </div>
-                        </div>
                         <div class="flex-grow-1 ms-3">
                             <h6 class="card-subtitle text-muted mb-1">Saldo Actual Certificados</h6>
                             <h3 class="card-title mb-0 text-primary">${{ socio.certifica|floatformat:2 }}</h3>
@@ -60,16 +50,6 @@
 
     <!-- Historial de Transacciones -->
     <div class="card shadow-sm">
-        <div class="card-header d-flex justify-content-between align-items-center">
-            <h5 class="mb-0">
-                <i class="bi bi-clock-history me-2"></i>
-                Historial de Movimientos
-            </h5>
-            {% if transactions %}
-                <span class="badge bg-primary">{{ page_obj.paginator.count }} transacciones</span>
-            {% endif %}
-        </div>
-
         {% if transactions %}
             <div class="card-body p-0">
                 <div class="table-responsive">

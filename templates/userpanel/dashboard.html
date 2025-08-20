@@ -1,169 +1,208 @@
 {% extends "layouts/base_socio.html" %}
 
-{% block title %}Mi Dashboard - CajaLink{% endblock %}
+{% block title %}Inicio - CajaLink{% endblock %}
 
 {% block main_content %}
-    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-        <h1 class="h2">Bienvenido, {{ full_name }}</h1>
-    </div>
+    <!-- Tarjetas principales del dashboard -->
+    <div class="row g-4 mb-4">
 
-    <div class="row g-4">
-        <div class="col-12">
-            <div class="card shadow-sm">
-                <div class="card-header fs-5 fw-medium"><i class="bi bi-wallet2 me-2"></i>Cuenta de Ahorros</div>
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-center flex-wrap">
-                        <div>
-                            <p class="card-text text-muted mb-1">Cuenta N°: {{ socio.cuenta }}</p>
-                            <h3 class="card-title mb-0">Saldo: ${{ socio.efectivo|floatformat:2 }}</h3>
-                        </div>
-                        <a href="{% url 'userpanel:ahorro_historial' %}" class="btn btn-primary mt-2 mt-md-0">
-                            <i class="bi bi-card-list me-1"></i> Ver Movimientos
-                        </a>
+        <!-- Tarjeta de Ahorros -->
+        <div class="col-lg-3 col-md-6">
+            <div class="card h-100 shadow-sm border-0">
+                <div class="card-body text-center p-4">
+                    <div class="mb-3">
+                        <i class="bi bi-piggy-bank text-primary" style="font-size: 2.5rem;"></i>
                     </div>
+                    <h5 class="card-title text-muted mb-3">Ahorros</h5>
+                    <h3 class="text-teal fw-bold mb-2">${{ ahorros_data.saldo_disponible|floatformat:2 }}</h3>
+                    <p class="text-muted small mb-0">
+                        <i class="bi bi-credit-card me-1"></i>
+                        {{ ahorros_data.numero_cuenta }}
+                    </p>
+                    <p class="text-muted small">Disponible</p>
                 </div>
             </div>
         </div>
 
-        {% if socio.certifica > 0 %}
-            <div class="col-12">
-                <div class="card shadow-sm">
-                    <div class="card-header fs-5 fw-medium"><i class="bi bi-patch-check-fill me-2"></i>Certificados de
-                        Aportación
+        <!-- Tarjeta de Certificados -->
+        <div class="col-lg-3 col-md-6">
+            <div class="card h-100 shadow-sm border-0">
+                <div class="card-body text-center p-4">
+                    <div class="mb-3">
+                        <i class="bi bi-file-earmark-check text-info" style="font-size: 2.5rem;"></i>
                     </div>
-                    <div class="card-body">
-                        <div class="d-flex justify-content-between align-items-center flex-wrap">
-                            <div>
-                                <p class="card-text text-muted mb-1">Cuenta N°: {{ socio.cuenta }}</p>
-                                <h3 class="card-title mb-0">Saldo: ${{ socio.certifica|floatformat:2 }}</h3>
-                            </div>
-                            <a href="{% url 'userpanel:certificado_historial' %}" class="btn btn-primary mt-2 mt-md-0">
-                                <i class="bi bi-card-list me-1"></i> Ver Movimientos
-                            </a>
-                        </div>
-                    </div>
+                    <h5 class="card-title text-muted mb-3">Certificados</h5>
+                    <h3 class="text-primary fw-bold mb-2">${{ certificados_data.cantidad_activa|floatformat:2 }}</h3>
+                    <p class="text-muted small">3 activos</p>
                 </div>
             </div>
-        {% endif %}
+        </div>
 
-        <!-- Nueva sección del Simulador de Créditos para Usuarios -->
-        <div class="col-12">
-            <div class="card shadow-sm">
-                <div class="card-header fs-5 fw-medium">
-                    <i class="bi bi-calculator me-2"></i>Simulador de Créditos
-                </div>
-                <div class="card-body">
-                    <div class="row align-items-center">
-                        <div class="col-lg-8">
-                            <p class="card-text text-muted mb-2">
-                                Simula tu próximo crédito y conoce las cuotas mensuales antes de solicitarlo.
-                            </p>
-                            <div class="d-flex flex-wrap gap-2">
-                                <small class="badge bg-light text-dark">
-                                    <i class="bi bi-check-circle me-1"></i>Cálculo instantáneo
-                                </small>
-                                <small class="badge bg-light text-dark">
-                                    <i class="bi bi-table me-1"></i>Tabla de amortización
-                                </small>
-                                <small class="badge bg-light text-dark">
-                                    <i class="bi bi-graph-up me-1"></i>Comparar productos
-                                </small>
-                            </div>
-                            {% if user_simulations_count > 0 %}
-                                <div class="mt-2">
-                                    <small class="text-info">
-                                        <i class="bi bi-info-circle me-1"></i>
-                                        Has realizado {{ user_simulations_count }} simulacion
-                                        {% if user_simulations_count != 1 %}es{% endif %}
-                                    </small>
-                                </div>
-                            {% endif %}
-                        </div>
-                        <div class="col-lg-4 text-lg-end mt-3 mt-lg-0">
-                            <div class="d-grid gap-2">
-                                <a href="{% url 'credit_simulator:simulation_form' %}" class="btn btn-success">
-                                    <i class="bi bi-calculator-fill me-2"></i>Nueva Simulación
-                                </a>
-                                {% if user_simulations_count > 0 %}
-                                    <a href="{% url 'credit_simulator:user_history' %}"
-                                       class="btn btn-outline-secondary btn-sm">
-                                        <i class="bi bi-clock-history me-1"></i>Mi Historial
-                                    </a>
-                                {% endif %}
-                            </div>
-                        </div>
+        <!-- Tarjeta de Créditos -->
+        <div class="col-lg-3 col-md-6">
+            <div class="card h-100 shadow-sm border-0">
+                <div class="card-body text-center p-4">
+                    <div class="mb-3">
+                        <i class="bi bi-credit-card-2-front text-warning" style="font-size: 2.5rem;"></i>
                     </div>
-
-                    {% if available_products_count > 0 %}
-                        <div class="mt-3 pt-3 border-top">
-                            <small class="text-muted d-block mb-2">Productos de crédito disponibles:</small>
-                            <div class="d-flex flex-wrap gap-1">
-                                {% for product in recent_products %}
-                                    <span class="badge bg-primary-subtle text-primary-emphasis">
-                                        {{ product.commercial_name }}
-                                    </span>
-                                {% endfor %}
-                                {% if available_products_count > 3 %}
-                                    <span class="badge bg-secondary-subtle text-secondary-emphasis">
-                                        +{{ available_products_count|add:"-3" }} más
-                                    </span>
-                                {% endif %}
-                            </div>
-                        </div>
+                    <h5 class="card-title text-muted mb-3">Créditos</h5>
+                    {% if creditos_data.cuota_pagar > 0 %}
+                        <h3 class="text-soft-orange fw-bold mb-2">${{ creditos_data.cuota_pagar|floatformat:2 }}</h3>
+                        <p class="text-muted small mb-0">Por pagar</p>
+                        {% if creditos_data.fecha_vencimiento %}
+                            <p class="text-muted small">
+                                <i class="bi bi-calendar-event me-1"></i>
+                                Vence: {{ creditos_data.fecha_vencimiento|date:"d/m/Y" }}
+                            </p>
+                        {% endif %}
+                    {% else %}
+                        <h3 class="text-success fw-bold mb-2">$0.00</h3>
+                        <p class="text-muted small">Sin cuotas pendientes</p>
                     {% endif %}
                 </div>
             </div>
         </div>
 
-        {% if credits_with_details %}
-            <div class="col-12">
-                <div class="card shadow-sm">
-                    <div class="card-header fs-5 fw-medium"><i class="bi bi-credit-card me-2"></i>Créditos Vigentes
+        <!-- Tarjeta de Plazos Fijos -->
+        <div class="col-lg-3 col-md-6">
+            <div class="card h-100 shadow-sm border-0">
+                <div class="card-body text-center p-4">
+                    <div class="mb-3">
+                        <i class="bi bi-graph-up-arrow" style="font-size: 2.5rem; color: #6f42c1;"></i>
                     </div>
-                    <div class="card-body p-0">
-                        <ul class="list-group list-group-flush">
-                            {% for item in credits_with_details %}
-                                <li class="list-group-item">
-                                    <div class="row align-items-center g-3">
-                                        <div class="col-lg-4 col-md-6">
-                                            <strong>Pagaré N°: {{ item.credit.num_paga }}</strong>
-                                            <div class="text-muted">Saldo:
-                                                ${{ item.credit.sal_pre|floatformat:2 }}</div>
-                                        </div>
-                                        <div class="col-lg-4 col-md-6">
-                                            {% if item.overdue_installment %}
-                                                <strong class="text-danger">
-                                                    <i class="bi bi-exclamation-triangle-fill me-1"></i>Cuota Vencida:
-                                                    ${{ item.overdue_installment.pagar|floatformat:2 }}
-                                                </strong>
-                                                <div class="text-muted">
-                                                    Venció: {{ item.overdue_installment.fecha_ven|date:"d/m/Y" }}</div>
-
-                                            {% elif item.next_installment %}
-                                                <strong>
-                                                    <i class="bi bi-calendar-event me-1"></i>Próxima Cuota:
-                                                    ${{ item.next_installment.pagar|floatformat:2 }}
-                                                </strong>
-                                                <div class="text-muted">
-                                                    Vence: {{ item.next_installment.fecha_ven|date:"d/m/Y" }}</div>
-
-                                            {% else %}
-                                                <span class="text-success">
-                                                    <i class="bi bi-check-circle-fill me-1"></i>Crédito sin cuotas pendientes.
-                                                </span>
-                                            {% endif %}
-                                        </div>
-                                        <div class="col-lg-4 col-md-12 text-lg-end">
-                                            <a href="{% url 'userpanel:credito_detail' item.credit.pk %}"
-                                               class="btn btn-outline-primary w-100 w-lg-auto">Ver Detalle de Cuotas</a>
-                                        </div>
-                                    </div>
-                                </li>
-                            {% endfor %}
-                        </ul>
-                    </div>
+                    <h5 class="card-title text-muted mb-3">Plazos</h5>
+                    <h3 class="fw-bold mb-2" style="color: #6f42c1;">
+                        ${{ plazos_data.inversion_total|floatformat:2 }}</h3>
+                    <p class="text-muted small">Invertido</p>
                 </div>
             </div>
-        {% endif %}
+        </div>
     </div>
+
+    <!-- Sección de Acciones Rápidas -->
+    <div class="border rounded-3 mb-4 bg-white">
+        <div class="py-3 px-4 border-bottom bg-light">
+            <div class="d-flex align-items-center">
+                <i class="bi bi-lightning-charge-fill text-primary me-2"></i>
+                <h5 class="mb-0">Acciones Rápidas</h5>
+            </div>
+        </div>
+        <div class="card-body py-4">
+            <div class="row g-4 text-center">
+
+                <!-- Acción -->
+                <div class="col-lg-3 col-md-6">
+                    <a href="{% url 'userpanel:simulator_integration' %}" class="text-decoration-none">
+                        <div class="quick-card bg-primary bg-opacity-10 text-primary">
+                            <i class="bi bi-calculator icon-xl mb-2"></i>
+                            <div class="fw-semibold">Simular</div>
+                        </div>
+                    </a>
+                </div>
+
+                <!-- Acción -->
+                <div class="col-lg-3 col-md-6">
+                    <a href="{% url 'userpanel:ahorro_historial' %}" class="text-decoration-none">
+                        <div class="quick-card bg-info bg-opacity-10 text-info">
+                            <i class="bi bi-file-earmark-bar-graph icon-xl mb-2"></i>
+                            <div class="fw-semibold">Estados</div>
+                        </div>
+                    </a>
+                </div>
+
+                <!-- Acción -->
+                <div class="col-lg-3 col-md-6">
+                    <a href="{% url 'users:password_change' %}" class="text-decoration-none">
+                        <div class="quick-card bg-warning bg-opacity-10 text-warning">
+                            <i class="bi bi-shield-lock icon-xl mb-2"></i>
+                            <div class="fw-semibold">Cambiar Contraseña</div>
+                        </div>
+                    </a>
+                </div>
+
+                <!-- Acción -->
+                <div class="col-lg-3 col-md-6">
+                    <a href="#" class="text-decoration-none">
+                        <div class="quick-card bg-success bg-opacity-10 text-success">
+                            <i class="bi bi-person-gear icon-xl mb-2"></i>
+                            <div class="fw-semibold">Actualizar Datos</div>
+                        </div>
+                    </a>
+                </div>
+
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+<!-- Estilos adicionales -->
+{% block extra_css %}
+    <style>
+        /* Nuevos colores personalizados */
+        .text-teal {
+            color: #20c997 !important;
+        }
+
+        .bg-teal-light {
+            background-color: #e6f9f6 !important;
+        }
+
+        .text-soft-orange {
+            color: #fd7e14 !important;
+        }
+
+        .bg-soft-orange {
+            background-color: #fff4e6 !important;
+        }
+
+        .bg-light-purple {
+            background-color: #f5f0ff !important;
+        }
+
+        .icon-xl {
+            font-size: 2.5rem;
+        }
+
+        /* Mejora de legibilidad y hover */
+        .card {
+            transition: all 0.3s ease;
+            background-color: #ffffff;
+        }
+
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08) !important;
+        }
+
+        .text-muted {
+            color: #6c757d !important;
+        }
+
+        .icon-xl {
+            font-size: 2.25rem;
+        }
+
+        .quick-card {
+            padding: 1.5rem 1rem;
+            border-radius: 0.75rem;
+            transition: all 0.3s ease;
+            background-color: #f8f9fa;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            box-shadow: 0 0 0 transparent;
+            border: 1px solid transparent;
+        }
+
+        .quick-card:hover {
+            transform: translateY(-5px);
+            background-color: #f1f3f5 !important;
+            box-shadow: 0 8px 18px rgba(0, 0, 0, 0.06);
+            border-color: rgba(0, 0, 0, 0.05);
+        }
+    </style>
+
+    </style>
+
 {% endblock %}

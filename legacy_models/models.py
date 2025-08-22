@@ -1,6 +1,20 @@
 # legacy_models/models.py
 
+from decimal import Decimal
+from typing import Dict, Optional
+
 from django.db import models
+from django.db.models import Q, Sum
+from django.utils import timezone
+
+from .managers import (
+    SocioManager,
+    CreditoManager,
+    CreditoCuotaManager,
+    PlazoFijoManager,
+    AhorroHistorialManager,
+    CertificadoHistorialManager
+)
 
 
 class Socio(models.Model):
@@ -51,7 +65,8 @@ class Socio(models.Model):
     estado = models.BooleanField("Estado", blank=True, null=True)
     fechacierr = models.DateField("Fecha Cierre", blank=True, null=True)
     linlibreta = models.DecimalField("Línea Libreta", max_digits=10, decimal_places=0, blank=True, null=True)
-    linlibcert = models.DecimalField("Línea Libreta Certificado", max_digits=10, decimal_places=0, blank=True,null=True)
+    linlibcert = models.DecimalField("Línea Libreta Certificado", max_digits=10, decimal_places=0, blank=True,
+                                     null=True)
     linfonmort = models.DecimalField("Línea Fondo Moroso", max_digits=10, decimal_places=0, blank=True, null=True)
     tipofirma = models.CharField("Tipo Firma", max_length=10, blank=True, null=True)
     firma_uno = models.TextField("Firma Uno", blank=True, null=True)
@@ -103,6 +118,8 @@ class Socio(models.Model):
     funcion2 = models.CharField("Función 2", max_length=20, blank=True, null=True)
     numlibreta = models.CharField("Número Libreta", max_length=8, blank=True, null=True)
 
+    objects = SocioManager()
+
     class Meta:
         managed = False
         db_table = 'socios'
@@ -112,10 +129,205 @@ class Socio(models.Model):
     def __str__(self):
         return f"{self.cuenta} - {self.nombres} {self.apellidos}"
 
+    # === MÉTODOS DE NEGOCIO PARA AHORROS ===
+
+    def get_saldo_ahorros(self) -> Decimal:
+        """
+        Retorna el saldo disponible en ahorros.
+        Principio: Encapsulación - La lógica del saldo está en el modelo
+        """
+        return self.efectivo or Decimal('0.00')
+
+    def get_ahorros_data(self) -> Dict[str, Decimal]:
+        """
+        Retorna información consolidada de ahorros.
+        Principio: Single Responsibility - Un metodo, una responsabilidad
+        """
+        return {
+            'numero_cuenta': self.cuenta,
+            'saldo_disponible': self.get_saldo_ahorros(),
+        }
+
+    # === MÉTODOS DE NEGOCIO PARA CERTIFICADOS ===
+
+    def get_certificados_activos(self) -> Decimal:
+        """
+        Retorna la cantidad activa de certificados.
+        """
+        return self.certifica or Decimal('0.00')
+
+    def get_certificados_data(self) -> Dict[str, Decimal]:
+        """
+        Retorna información consolidada de certificados.
+        """
+        return {
+            'cantidad_activa': self.get_certificados_activos(),
+        }
+
+    # === MÉTODOS DE NEGOCIO PARA CRÉDITOS ===
+
+    def get_creditos_activos(self):
+        """
+        Retorna QuerySet de créditos activos del socio.
+        Principio: Law of Demeter - No acceder directamente a objetos relacionados desde la vista
+        """
+        return self.creditos.active()
+
+    def get_proxima_cuota_info(self) -> Optional[Dict]:
+        """
+        Obtiene información de la próxima cuota a pagar.
+        Retorna None si no hay cuotas pendientes.
+        Principio: Encapsulación - La lógica compleja se maneja en el modelo
+        """
+        # Obtener la cuota más próxima no pagada usando el manager
+        proxima_cuota = CreditoCuota.objects.by_socio(self).pending().order_by('fecha_ven').first()
+
+        if not proxima_cuota:
+            return None
+
+        return {
+            'monto': proxima_cuota.pagar or Decimal('0.00'),
+            'fecha_vencimiento': proxima_cuota.fecha_ven,
+            'credito': proxima_cuota.num_paga,
+        }
+
+    def get_creditos_data(self) -> Dict:
+        """
+        Retorna información consolidada de créditos.
+        Principio: Single Responsibility
+        """
+        proxima_cuota = self.get_proxima_cuota_info()
+        creditos_activos = self.get_creditos_activos()
+
+        return {
+            'creditos_activos_count': creditos_activos.count(),
+            'saldo_total': creditos_activos.aggregate(
+                total=Sum('sal_pre')
+            )['total'] or Decimal('0.00'),
+            'proxima_cuota': proxima_cuota,
+        }
+
+    def has_overdue_payments(self) -> bool:
+        """
+        Verifica si el socio tiene pagos vencidos.
+        """
+        return CreditoCuota.objects.by_socio(self).overdue().exists()
+
+    def get_credit_payment_compliance(self) -> Decimal:
+        """
+        Calcula el porcentaje de cumplimiento en pagos.
+        Retorna valor entre 0 y 100.
+        """
+        total_cuotas = CreditoCuota.objects.by_socio(self).count()
+        if total_cuotas == 0:
+            return Decimal('100.00')  # Sin créditos = 100% cumplimiento
+
+        cuotas_pagadas = CreditoCuota.objects.by_socio(self).paid().count()
+        return (Decimal(str(cuotas_pagadas)) / Decimal(str(total_cuotas))) * Decimal('100')
+
+    # === MÉTODOS DE NEGOCIO PARA PLAZOS FIJOS ===
+
+    def get_plazos_fijos_activos(self):
+        """
+        Retorna QuerySet de plazos fijos activos del socio.
+        """
+        return self.plazos_fijos.active()
+
+    def get_inversion_total_plazos(self) -> Decimal:
+        """
+        Calcula la inversión total en plazos fijos activos.
+        Principio: DRY - Esta lógica estaba duplicada en la vista
+        """
+        total_result = self.get_plazos_fijos_activos().aggregate(total=Sum('cantidad'))
+        return total_result['total'] or Decimal('0.00')
+
+    def get_plazos_data(self) -> Dict[str, Decimal]:
+        """
+        Retorna información consolidada de plazos fijos.
+        """
+        return {
+            'inversion_total': self.get_inversion_total_plazos(),
+            'plazos_activos_count': self.get_plazos_fijos_activos().count(),
+        }
+
+    def get_plazos_maturing_soon(self, days: int = 30):
+        """
+        Obtiene plazos fijos que vencen pronto.
+        """
+        return self.plazos_fijos.maturing_soon(days)
+
+    # === METODO PRINCIPAL PARA DASHBOARD ===
+
+    def get_dashboard_data(self) -> Dict:
+        """
+        Metodo principal que consolida toda la información del dashboard.
+        Principio: Facade Pattern - Simplifica el acceso a múltiples subsistemas
+        Principio: Single Responsibility - Cada submetodo maneja su dominio
+        """
+        return {
+            'ahorros_data': self.get_ahorros_data(),
+            'certificados_data': self.get_certificados_data(),
+            'creditos_data': self.get_creditos_data(),
+            'plazos_data': self.get_plazos_data(),
+        }
+
+    # === MÉTODOS DE ESTADO Y VALIDACIÓN ===
+
+    def is_active(self) -> bool:
+        """Verifica si el socio está activo"""
+        return self.estado == 'A' and not self.cerrado
+
+    def is_moroso(self) -> bool:
+        """Verifica si el socio está en mora"""
+        return self.moroso or self.has_overdue_payments()
+
+    def get_full_name(self) -> str:
+        """Retorna el nombre completo del socio"""
+        nombres = self.nombres or ""
+        apellidos = self.apellidos or ""
+        return f"{nombres} {apellidos}".strip()
+
+    def has_web_user(self) -> bool:
+        """Verifica si el socio tiene usuario web vinculado"""
+        return hasattr(self, 'usersociolink') and self.usersociolink is not None
+
+    # === MÉTODOS DE ANÁLISIS FINANCIERO ===
+
+    def get_patrimonio_total(self) -> Decimal:
+        """Calcula el patrimonio total del socio"""
+        return (
+                self.get_saldo_ahorros() +
+                self.get_certificados_activos() +
+                self.get_inversion_total_plazos()
+        )
+
+    def get_obligaciones_totales(self) -> Decimal:
+        """Calcula las obligaciones totales del socio"""
+        creditos_data = self.get_creditos_data()
+        return creditos_data.get('saldo_total', Decimal('0.00'))
+
+    def get_patrimonio_neto(self) -> Decimal:
+        """Calcula el patrimonio neto (patrimonio - obligaciones)"""
+        return self.get_patrimonio_total() - self.get_obligaciones_totales()
+
+    def get_ratio_endeudamiento(self) -> Decimal:
+        """
+        Calcula el ratio de endeudamiento como porcentaje.
+        Retorna 0 si no hay patrimonio.
+        """
+        patrimonio = self.get_patrimonio_total()
+        obligaciones = self.get_obligaciones_totales()
+
+        if patrimonio == 0:
+            return Decimal('0.00')
+
+        return (obligaciones / patrimonio) * Decimal('100')
+
 
 class AhorroHistorial(models.Model):
     id = models.AutoField(primary_key=True)
-    cuenta = models.ForeignKey(Socio, on_delete=models.DO_NOTHING, to_field='cuenta', db_column='cuenta',related_name='ahorros_historial')
+    cuenta = models.ForeignKey(Socio, on_delete=models.DO_NOTHING, to_field='cuenta', db_column='cuenta',
+                               related_name='ahorros_historial')
     caja = models.CharField("Caja", max_length=2, blank=True, null=True)
     tipo_tra = models.CharField("Tipo Transacción", max_length=4, blank=True, null=True)
     num_trans = models.CharField("Número Transacción", max_length=8, blank=True, null=True)
@@ -134,20 +346,43 @@ class AhorroHistorial(models.Model):
     contabili = models.BooleanField("Contabilizado", blank=True, null=True)
     codigocont = models.CharField("Código Contable", max_length=15, blank=True, null=True)
 
+    objects = AhorroHistorialManager()
+
     class Meta:
         managed = False
         db_table = 'ahor'
-        verbose_name = "Historial Ahorro"
-        verbose_name_plural = "Historial Ahorros"
+        verbose_name = "Historial de Ahorro"
+        verbose_name_plural = "Historiales de Ahorro"
 
     def __str__(self):
-        return f"Transacción {self.num_trans} - Cuenta {self.cuenta.cuenta}"
+        return f"{self.detalle} - {self.valor} ({self.fecha_tra})"
+
+    def is_ingreso(self) -> bool:
+        """Verifica si la transacción es un ingreso"""
+        return self.ingre_egre == 'I'
+
+    def is_egreso(self) -> bool:
+        """Verifica si la transacción es un egreso"""
+        return self.ingre_egre == 'E'
+
+    def get_valor_absoluto(self) -> Decimal:
+        """Retorna el valor absoluto de la transacción"""
+        return abs(self.valor) if self.valor else Decimal('0.00')
+
+    def get_valor_con_signo(self) -> Decimal:
+        """
+        Retorna el valor con signo según el tipo de transacción.
+        Positivo para ingresos, negativo para egresos.
+        """
+        valor = self.valor or Decimal('0.00')
+        return valor if self.is_ingreso() else -valor
 
 
 class CertificadoHistorial(models.Model):
     id = models.AutoField(primary_key=True)
     caja = models.CharField("Caja", max_length=2, blank=True, null=True)
-    cuenta = models.ForeignKey(Socio, on_delete=models.DO_NOTHING, to_field='cuenta', db_column='cuenta', related_name='certificados_historial')
+    cuenta = models.ForeignKey(Socio, on_delete=models.DO_NOTHING, to_field='cuenta', db_column='cuenta',
+                               related_name='certificados_historial')
     fecha_tra = models.DateField("Fecha Transacción", blank=True, null=True)
     hora = models.CharField("Hora", max_length=5, blank=True, null=True)
     num_doc = models.CharField("Número Documento", max_length=11, blank=True, null=True)
@@ -164,17 +399,43 @@ class CertificadoHistorial(models.Model):
     contabili = models.BooleanField("Contabilizado", blank=True, null=True)
     codigocont = models.CharField("Código Contable", max_length=15, blank=True, null=True)
 
+    objects = CertificadoHistorialManager()
+
     class Meta:
         managed = False
         db_table = 'cert'
         verbose_name = "Historial Certificado"
         verbose_name_plural = "Historial Certificados"
 
+    def __str__(self):
+        return f"{self.detalle} - {self.valor} ({self.fecha_tra})"
+
+    def is_ingreso(self) -> bool:
+        """Verifica si la transacción es un ingreso"""
+        return self.ingre_egre == 'I'
+
+    def is_egreso(self) -> bool:
+        """Verifica si la transacción es un egreso"""
+        return self.ingre_egre == 'E'
+
+    def get_valor_absoluto(self) -> Decimal:
+        """Retorna el valor absoluto de la transacción"""
+        return abs(self.valor) if self.valor else Decimal('0.00')
+
+    def get_valor_con_signo(self) -> Decimal:
+        """
+        Retorna el valor con signo según el tipo de transacción.
+        Positivo para ingresos, negativo para egresos.
+        """
+        valor = self.valor or Decimal('0.00')
+        return valor if self.is_ingreso() else -valor
+
 
 class Credito(models.Model):
     id = models.AutoField(primary_key=True)
     caja = models.CharField("Caja", max_length=2, blank=True, null=True)
-    cuenta = models.ForeignKey(Socio, on_delete=models.DO_NOTHING, to_field='cuenta', db_column='cuenta',related_name='creditos')
+    cuenta = models.ForeignKey(Socio, on_delete=models.DO_NOTHING, to_field='cuenta', db_column='cuenta',
+                               related_name='creditos')
     num_paga = models.CharField("Número Pago", max_length=8, unique=True)
     num_reci = models.CharField("Número Recibo", max_length=8, blank=True, null=True)
     fech_pres = models.DateField("Fecha Préstamo", blank=True, null=True)
@@ -241,6 +502,8 @@ class Credito(models.Model):
     valseguro = models.DecimalField("Valor Seguro", max_digits=10, decimal_places=2, blank=True, null=True)
     _nullflags = models.TextField(blank=True, null=True)
 
+    objects = CreditoManager()
+
     class Meta:
         managed = False
         db_table = 'credito'
@@ -248,12 +511,76 @@ class Credito(models.Model):
         verbose_name_plural = "Créditos"
 
     def __str__(self):
-        return f"Crédito {self.num_paga} - Cuenta {self.cuenta.cuenta}"
+        return f"Crédito {self.num_paga} - {self.cuenta}"
+
+    def get_saldo_pendiente(self) -> Decimal:
+        """Retorna el saldo pendiente del crédito"""
+        return self.sal_pre or Decimal('0.00')
+
+    def get_valor_original(self) -> Decimal:
+        """Retorna el valor original del préstamo"""
+        return self.val_prest or Decimal('0.00')
+
+    def get_porcentaje_pagado(self) -> Decimal:
+        """
+        Calcula el porcentaje pagado del crédito.
+        Retorna valor entre 0 y 100.
+        """
+        valor_original = self.get_valor_original()
+        if valor_original == 0:
+            return Decimal('100.00')
+
+        saldo_pendiente = self.get_saldo_pendiente()
+        valor_pagado = valor_original - saldo_pendiente
+
+        return (valor_pagado / valor_original) * Decimal('100')
+
+    def is_active(self) -> bool:
+        """Verifica si el crédito está activo"""
+        return not self.pagado and self.get_saldo_pendiente() > 0
+
+    def is_overdue(self) -> bool:
+        """Verifica si el crédito tiene cuotas vencidas"""
+        return self.cuotas_credito.filter(
+            Q(pagado=False) | Q(pagado__isnull=True),
+            fecha_ven__lt=timezone.now().date()
+        ).exists()
+
+    def get_cuotas_pendientes(self):
+        """Retorna las cuotas pendientes de pago ordenadas por fecha"""
+        return self.cuotas_credito.filter(
+            Q(pagado=False) | Q(pagado__isnull=True)
+        ).order_by('fecha_ven')
+
+    def get_cuotas_vencidas(self):
+        """Retorna las cuotas vencidas"""
+        return CreditoCuota.objects.by_credit(self).overdue()
+
+    def get_proxima_cuota(self):
+        """Retorna la próxima cuota a vencer"""
+        return self.get_cuotas_pendientes().first()
+
+    def get_total_cuotas_pendientes(self) -> Decimal:
+        """Calcula el monto total de cuotas pendientes"""
+        total = self.get_cuotas_pendientes().aggregate(
+            total=Sum('pagar')
+        )['total']
+        return total or Decimal('0.00')
+
+    def get_dias_mora_maximo(self) -> int:
+        """Obtiene los días de mora máximos del crédito"""
+        cuota_mas_vencida = self.get_cuotas_vencidas().order_by('fecha_ven').first()
+        if not cuota_mas_vencida or not cuota_mas_vencida.fecha_ven:
+            return 0
+
+        dias_mora = (timezone.now().date() - cuota_mas_vencida.fecha_ven).days
+        return max(0, dias_mora)
 
 
 class CreditoCuota(models.Model):
     id = models.AutoField(primary_key=True)
-    num_paga = models.ForeignKey(Credito, on_delete=models.DO_NOTHING, to_field='num_paga', db_column='num_paga', related_name='cuotas_credito')
+    num_paga = models.ForeignKey(Credito, on_delete=models.DO_NOTHING, to_field='num_paga', db_column='num_paga',
+                                 related_name='cuotas_credito')
     documento = models.CharField("Documento", max_length=8, blank=True, null=True)
     capital = models.DecimalField("Capital", max_digits=10, decimal_places=2, blank=True, null=True)
     ncuota = models.IntegerField("Número Cuota", blank=True, null=True)
@@ -269,11 +596,64 @@ class CreditoCuota(models.Model):
     pagado = models.BooleanField("Pagado", blank=True, null=True)
     gcobro = models.DecimalField("Gastos Cobro", max_digits=10, decimal_places=2, blank=True, null=True)
 
+    objects = CreditoCuotaManager()
+
     class Meta:
         managed = False
         db_table = 'crecuotaf'
         verbose_name = "Cuota de Crédito"
         verbose_name_plural = "Cuotas de Crédito"
+
+    def __str__(self):
+        return f"Cuota {self.ncuota} - Crédito {self.num_paga}"
+
+    def get_monto_cuota(self) -> Decimal:
+        """Retorna el monto de la cuota"""
+        return self.pagar or Decimal('0.00')
+
+    def is_paid(self) -> bool:
+        """Verifica si la cuota está pagada"""
+        return self.pagado or False
+
+    def is_overdue(self) -> bool:
+        """Verifica si la cuota está vencida"""
+        if not self.fecha_ven or self.is_paid():
+            return False
+        return self.fecha_ven < timezone.now().date()
+
+    def get_days_until_due(self) -> int:
+        """
+        Obtiene los días hasta el vencimiento.
+        Retorna número negativo si ya venció.
+        """
+        if not self.fecha_ven:
+            return 0
+
+        delta = self.fecha_ven - timezone.now().date()
+        return delta.days
+
+    def get_days_overdue(self) -> int:
+        """
+        Obtiene los días de mora.
+        Retorna 0 si no está vencida o está pagada.
+        """
+        if not self.is_overdue():
+            return 0
+
+        return abs(self.get_days_until_due())
+
+    def get_status_display(self) -> str:
+        """Retorna el estado de la cuota en formato legible"""
+        if self.is_paid():
+            return "Pagada"
+        elif self.is_overdue():
+            return f"Vencida ({self.get_days_overdue()} días)"
+        else:
+            days_until = self.get_days_until_due()
+            if days_until <= 7:
+                return f"Próxima a vencer ({days_until} días)"
+            else:
+                return "Vigente"
 
 
 class CreditoHistorial(models.Model):
@@ -291,8 +671,10 @@ class CreditoHistorial(models.Model):
     ingre_egre = models.CharField("Ingreso/Egreso", max_length=1, blank=True, null=True)
     tipo_tra = models.CharField("Tipo Transacción", max_length=4, blank=True, null=True)
     asistencre = models.DecimalField("Asistencia Crédito", max_digits=10, decimal_places=2, blank=True, null=True)
-    cuenta = models.ForeignKey(Socio, on_delete=models.DO_NOTHING, to_field='cuenta', db_column='cuenta', related_name='creditos_historial')
-    num_paga = models.ForeignKey(Credito, on_delete=models.DO_NOTHING, to_field='num_paga', db_column='num_paga', related_name='historiales')
+    cuenta = models.ForeignKey(Socio, on_delete=models.DO_NOTHING, to_field='cuenta', db_column='cuenta',
+                               related_name='creditos_historial')
+    num_paga = models.ForeignKey(Credito, on_delete=models.DO_NOTHING, to_field='num_paga', db_column='num_paga',
+                                 related_name='historiales')
     fecha_ini = models.DateField("Fecha Inicio", blank=True, null=True)
     fecha_fin = models.DateField("Fecha Fin", blank=True, null=True)
     efectivo = models.DecimalField("Efectivo", max_digits=10, decimal_places=2, blank=True, null=True)
@@ -342,7 +724,8 @@ class PlazoFijo(models.Model):
     cedula = models.CharField("Cédula", max_length=10, blank=True, null=True)
     cliente = models.CharField("Cliente", max_length=30, blank=True, null=True)
     beneficia = models.CharField("Beneficiario", max_length=40, blank=True, null=True)
-    cuenta = models.ForeignKey(Socio, on_delete=models.DO_NOTHING, to_field='cuenta', db_column='cuenta', blank=True, null=True, related_name='plazos_fijos')
+    cuenta = models.ForeignKey(Socio, on_delete=models.DO_NOTHING, to_field='cuenta', db_column='cuenta', blank=True,
+                               null=True, related_name='plazos_fijos')
     direccion = models.CharField("Dirección", max_length=40, blank=True, null=True)
     parroquia = models.CharField("Parroquia", max_length=3, blank=True, null=True)
     barrio_id = models.CharField("Barrio ID", max_length=3, blank=True, null=True)
@@ -361,11 +744,85 @@ class PlazoFijo(models.Model):
     pagado = models.BooleanField("Pagado", blank=True, null=True)
     preimpreso = models.BooleanField("Preimpreso", blank=True, null=True)
 
+    objects = PlazoFijoManager()
+
     class Meta:
         managed = False
         db_table = 'plazo_fi'
         verbose_name = "Plazo Fijo"
         verbose_name_plural = "Plazos Fijos"
+
+    def __str__(self):
+        return f"Plazo Fijo {self.documento} - {self.cliente}"
+
+    def get_monto_inversion(self) -> Decimal:
+        """Retorna el monto de la inversión"""
+        return self.cantidad or Decimal('0.00')
+
+    def is_active(self) -> bool:
+        """Verifica si el plazo fijo está activo"""
+        return not self.pagado
+
+    def is_matured(self) -> bool:
+        """Verifica si el plazo fijo ha vencido"""
+        if not self.fechavenci:
+            return False
+        return self.fechavenci < timezone.now().date()
+
+    def days_to_maturity(self) -> Optional[int]:
+        """
+        Retorna los días hasta el vencimiento.
+        Retorna None si no hay fecha de vencimiento.
+        Retorna número negativo si ya venció.
+        """
+        if not self.fechavenci:
+            return None
+
+        today = timezone.now().date()
+        delta = self.fechavenci - today
+        return delta.days
+
+    def is_maturing_soon(self, days: int = 30) -> bool:
+        """Verifica si el plazo fijo vence pronto"""
+        days_left = self.days_to_maturity()
+        if days_left is None:
+            return False
+        return 0 <= days_left <= days
+
+    def get_maturity_status(self) -> str:
+        """Retorna el estado de vencimiento en formato legible"""
+        if not self.is_active():
+            return "Pagado"
+
+        days_left = self.days_to_maturity()
+        if days_left is None:
+            return "Sin fecha de vencimiento"
+        elif days_left < 0:
+            return f"Vencido ({abs(days_left)} días)"
+        elif days_left <= 30:
+            return f"Próximo a vencer ({days_left} días)"
+        else:
+            return "Vigente"
+
+    def calculate_projected_value(self, annual_rate: Decimal) -> Decimal:
+        """
+        Calcula el valor proyectado al vencimiento.
+        Usa interés simple para el cálculo.
+        """
+        if not self.fechavenci or not self.fechadepos:
+            return self.get_monto_inversion()
+
+        principal = self.get_monto_inversion()
+        days = (self.fechavenci - self.fechadepos).days
+
+        if days <= 0:
+            return principal
+
+        # Interés simple: I = P * r * t
+        daily_rate = annual_rate / Decimal('100') / Decimal('365')
+        interest = principal * daily_rate * Decimal(str(days))
+
+        return principal + interest
 
 
 class PlazoFijoPago(models.Model):
@@ -375,7 +832,8 @@ class PlazoFijoPago(models.Model):
     capital = models.DecimalField("Capital", max_digits=12, decimal_places=2, blank=True, null=True)
     fechainici = models.DateField("Fecha Inicio", blank=True, null=True)
     fechapago = models.DateField("Fecha Pago", blank=True, null=True)
-    documento = models.ForeignKey(PlazoFijo, on_delete=models.DO_NOTHING, to_field='documento', db_column='documento', blank=True, null=True, related_name='pagos')
+    documento = models.ForeignKey(PlazoFijo, on_delete=models.DO_NOTHING, to_field='documento', db_column='documento',
+                                  blank=True, null=True, related_name='pagos')
 
     class Meta:
         managed = False
@@ -393,10 +851,12 @@ class PlazoFijoHistorial(models.Model):
     impuesto = models.DecimalField("Impuesto", max_digits=10, decimal_places=2, blank=True, null=True)
     tipo_tra = models.CharField("Tipo Transacción", max_length=4, blank=True, null=True)
     caja = models.CharField("Caja", max_length=2, blank=True, null=True)
-    documento = models.ForeignKey(PlazoFijo, on_delete=models.DO_NOTHING, to_field='documento', db_column='documento',blank=True, null=True, related_name='historiales')
+    documento = models.ForeignKey(PlazoFijo, on_delete=models.DO_NOTHING, to_field='documento', db_column='documento',
+                                  blank=True, null=True, related_name='historiales')
     efectivo = models.DecimalField("Efectivo", max_digits=10, decimal_places=2, blank=True, null=True)
     cliente = models.CharField("Cliente", max_length=35, blank=True, null=True)
-    cuenta = models.ForeignKey(Socio, on_delete=models.DO_NOTHING, to_field='cuenta', db_column='cuenta', blank=True, null=True, related_name='plazos_fijos_historial')
+    cuenta = models.ForeignKey(Socio, on_delete=models.DO_NOTHING, to_field='cuenta', db_column='cuenta', blank=True,
+                               null=True, related_name='plazos_fijos_historial')
     cheques = models.DecimalField("Cheques", max_digits=10, decimal_places=2, blank=True, null=True)
     hora = models.CharField("Hora", max_length=10, blank=True, null=True)
     contabili = models.BooleanField("Contabilizado", blank=True, null=True)

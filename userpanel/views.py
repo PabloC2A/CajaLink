@@ -226,7 +226,7 @@ class SimulatorIntegrationView(SocioDataMixin, TemplateView):
         context.update({
             'socio': self.socio,
             'available_products': available_products,
-            'user_simulations': user_simulations[:10],  # Últimas 10
+            'user_simulations': user_simulations[:10],
             'products_count': available_products.count(),
             'simulations_count': user_simulations.count(),
         })

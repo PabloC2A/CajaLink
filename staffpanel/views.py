@@ -3,25 +3,22 @@
 from django.contrib import messages
 from django.contrib.auth.mixins import UserPassesTestMixin
 from django.contrib.auth.models import User
-from django.db.models import Q
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse_lazy
 from django.utils import timezone
-from django.views.generic import ListView, FormView, TemplateView
 from django.views import View
+from django.views.generic import ListView, FormView, TemplateView
 
+from credit_simulator.models import CreditProduct, CreditSimulation
 from legacy_models.models import Socio, AhorroHistorial
 from users.services import create_web_user_for_socio
 from .forms import WebUserLinkForm
-
-# Importaciones para el simulador de créditos
-from credit_simulator.models import CreditProduct, CreditSimulation
+from .selectors import get_unified_socio_list
 
 
 class StaffRequiredMixin(UserPassesTestMixin):
     """
-    Mixin que asegura que solo los usuarios marcados como 'staff'
-    puedan acceder a la vista.
+    Mixin que asegura que solo los usuarios marcados como 'staff' puedan acceder a la vista.
     """
 
     def test_func(self):
@@ -65,51 +62,39 @@ class StaffDashboardView(StaffRequiredMixin, TemplateView):
 
 class UserListView(StaffRequiredMixin, ListView):
     """
-    Muestra una lista de todos los usuarios web de TIPO SOCIO ya creados.
+    Vista unificada que muestra tanto usuarios como socios disponibles para vincular en una sola lista.
     """
     template_name = 'staffpanel/user_list.html'
-    context_object_name = 'web_users'
+    context_object_name = 'unified_list'
     paginate_by = 20
 
     def get_queryset(self):
         """
-        Optimiza la consulta usando select_related para traer el Vínculo y el Socio
-        en la misma consulta, evitando múltiples accesos a la BD.
+        Delega la construcción del queryset al selector.
         """
-        return User.objects.filter(is_staff=False).select_related('link__socio')
-
-
-class LinkSocioSearchView(StaffRequiredMixin, ListView):
-    """
-    Muestra una lista paginada de Socios que AÚN NO tienen una cuenta web vinculada.
-    Incluye una funcionalidad de búsqueda.
-    """
-    model = Socio
-    template_name = 'staffpanel/link_socio_search.html'
-    context_object_name = 'socios'
-    paginate_by = 10
-
-    def get_queryset(self):
-        """
-        Filtra los socios para mostrar solo aquellos sin un UserSocioLink.
-        """
-        queryset = Socio.objects.filter(usersociolink__isnull=True)
-        query = self.request.GET.get('q', '')
-        if query:
-            # Búsqueda por nombres, apellidos o cédula
-            queryset = queryset.filter(
-                Q(nombres__icontains=query) |
-                Q(apellidos__icontains=query) |
-                Q(cedula__icontains=query)
-            )
-        return queryset
+        search_query = self.request.GET.get('q', '').strip()
+        return get_unified_socio_list(search_query)
 
     def get_context_data(self, **kwargs):
         """
-        Añade el término de búsqueda al contexto para mostrarlo en el input.
+        Añade información adicional al contexto manteniendo alta cohesión.
         """
         context = super().get_context_data(**kwargs)
         context['search_query'] = self.request.GET.get('q', '')
+
+        # Estadísticas para mejorar UX (usando el selector para consistencia)
+        all_socios = get_unified_socio_list()
+        linked_count = sum(1 for socio in all_socios if socio.is_linked)
+        total_count = all_socios.count()
+
+        context.update({
+            'stats': {
+                'total_socios': total_count,
+                'linked_count': linked_count,
+                'unlinked_count': total_count - linked_count
+            }
+        })
+
         return context
 
 
@@ -123,38 +108,37 @@ class LinkSocioCreateUserView(StaffRequiredMixin, FormView):
 
     def get_initial(self):
         """
-        Pre-rellena el formulario con datos del Socio para facilitar la tarea al empleado
+        Pre-rellena el formulario con datos del Socio.
+        Aplica principio DRY reutilizando lógica de sugerencias.
         """
-        socio = get_object_or_404(Socio, id=self.kwargs.get('socio_id'))
+        socio = self._get_socio()
         initial = super().get_initial()
         initial['email'] = socio.email or ''
-        # Sugiere un nombre de usuario basado en el email o la cédula
-        if socio.email:
-            initial['username'] = socio.email.split('@')[0]
-        elif socio.cedula:
-            initial['username'] = socio.cedula
+
+        # Factory pattern para generar username sugerido
+        initial['username'] = self._generate_suggested_username(socio)
         return initial
 
     def get_context_data(self, **kwargs):
         """
-        Añade el objeto Socio al contexto para mostrar su nombre en la plantilla.
+        Añade el objeto Socio al contexto.
         """
         context = super().get_context_data(**kwargs)
-        context['socio'] = get_object_or_404(Socio, id=self.kwargs.get('socio_id'))
+        context['socio'] = self._get_socio()
         return context
 
     def form_valid(self, form):
         """
-        Si el formulario es válido, llama al servicio para crear y vincular el usuario.
+        Procesa el formulario válido delegando la lógica de negocio al service.
         """
-        socio = get_object_or_404(Socio, id=self.kwargs.get('socio_id'))
+        socio = self._get_socio()
         data = form.cleaned_data
 
         try:
             new_user, temp_password = create_web_user_for_socio(
                 socio=socio,
                 username=data['username'],
-                email=data.get('email') or socio.email,  # Usa el email del form o el del socio
+                email=data.get('email') or socio.email,
                 first_name=socio.nombres,
                 last_name=socio.apellidos
             )
@@ -170,16 +154,37 @@ class LinkSocioCreateUserView(StaffRequiredMixin, FormView):
             )
         return super().form_valid(form)
 
+    def _get_socio(self):
+        """
+        Metodo helper que encapsula la obtención del Socio.
+        """
+        return get_object_or_404(Socio, id=self.kwargs.get('socio_id'))
+
+    def _generate_suggested_username(self, socio):
+        """
+        Genera un username sugerido basado en los datos del socio.
+        """
+        if socio.email:
+            return socio.email.split('@')[0]
+        elif socio.cedula:
+            return socio.cedula
+        return f"socio_{socio.id}"
+
 
 class DeactivateUserView(StaffRequiredMixin, View):
     """
-    Desactiva una cuenta de socio. Solo responde a peticiones POST.
+    Desactiva una cuenta de socio y redirige con mensaje.
     """
 
     def post(self, request, *args, **kwargs):
         user_id = self.kwargs.get('user_id')
         user_to_deactivate = get_object_or_404(User, pk=user_id, is_staff=False)
+
         user_to_deactivate.is_active = False
         user_to_deactivate.save()
-        messages.warning(request, f"El usuario '{user_to_deactivate.username}' ha sido desactivado.")
+
+        messages.warning(
+            request,
+            f"El usuario '{user_to_deactivate.username}' ha sido desactivado."
+        )
         return redirect('staffpanel:user_list')

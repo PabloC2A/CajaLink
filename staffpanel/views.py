@@ -1,7 +1,6 @@
 # staffpanel/views.py
 
 from django.contrib import messages
-from django.contrib.auth.mixins import UserPassesTestMixin
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 from django.db import IntegrityError
@@ -10,11 +9,10 @@ from django.urls import reverse_lazy
 from django.utils import timezone
 from django.views import View
 from django.views.generic import ListView, FormView, TemplateView
-
 from credit_simulator.models import CreditProduct, CreditSimulation
 from legacy_models.models import Socio, AhorroHistorial
-from users.services import create_web_user_for_socio
 from users.mixins import StaffRequiredMixin, logger
+from users.services import create_web_user_for_socio
 from .forms import WebUserLinkForm
 from .selectors import get_unified_socio_list
 

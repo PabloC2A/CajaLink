@@ -1,28 +1,26 @@
 # credit_simulator/views.py
 
+import json
+from decimal import Decimal
 from django.contrib import messages
-from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
-from django.core.exceptions import PermissionDenied
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db.models import Q, Count, Avg, Sum
 from django.db.models.functions import TruncMonth
 from django.http import JsonResponse, Http404
 from django.shortcuts import get_object_or_404, redirect
-from django.urls import reverse_lazy, reverse
+from django.urls import reverse_lazy
+from django.views import View
 from django.views.generic import (
     ListView, CreateView, UpdateView, DetailView,
     FormView, TemplateView
 )
-from django.views import View
-from decimal import Decimal
-import json
-
-from .models import CreditProduct, CreditSimulation, AmortizationScheduleEntry
+from users.mixins import StaffRequiredMixin
 from .forms import (
     CreditProductForm, CreditSimulationForm,
     CreditProductFilterForm, AmortizationScheduleForm
 )
+from .models import CreditProduct, CreditSimulation
 from .services import CreditSimulationService, CreditProductService
-from users.mixins import StaffRequiredMixin
 
 
 # =============================================================================

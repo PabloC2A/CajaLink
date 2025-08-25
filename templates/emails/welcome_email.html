@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bienvenido a {{ company_name }}</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f4f4f4;
+        }
+
+        .email-container {
+            background-color: #ffffff;
+            border-radius: 10px;
+            padding: 30px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .header {
+            text-align: center;
+            border-bottom: 3px solid #007bff;
+            padding-bottom: 20px;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            color: #007bff;
+            margin: 0;
+            font-size: 28px;
+        }
+
+        .credentials-box {
+            background-color: #f8f9fa;
+            border: 2px solid #007bff;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 25px 0;
+            text-align: center;
+        }
+
+        .credentials-box h3 {
+            color: #007bff;
+            margin-top: 0;
+            font-size: 18px;
+        }
+
+        .credential-item {
+            background-color: #ffffff;
+            padding: 12px;
+            margin: 10px 0;
+            border-radius: 5px;
+            border-left: 4px solid #28a745;
+        }
+
+        .credential-label {
+            font-weight: bold;
+            color: #495057;
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .credential-value {
+            font-family: 'Courier New', monospace;
+            font-size: 16px;
+            color: #dc3545;
+            font-weight: bold;
+        }
+
+        .security-notice {
+            background-color: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 5px;
+            padding: 15px;
+            margin: 20px 0;
+        }
+
+        .security-notice h4 {
+            color: #856404;
+            margin-top: 0;
+        }
+
+        .login-button {
+            display: inline-block;
+            background-color: #007bff;
+            color: white;
+            text-decoration: none;
+            padding: 12px 30px;
+            border-radius: 5px;
+            font-weight: bold;
+            margin: 20px 0;
+        }
+
+        .login-button:hover {
+            background-color: #0056b3;
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #dee2e6;
+            color: #6c757d;
+            font-size: 14px;
+        }
+
+        .steps {
+            background-color: #e9ecef;
+            padding: 20px;
+            border-radius: 5px;
+            margin: 20px 0;
+        }
+
+        .steps h4 {
+            color: #495057;
+            margin-top: 0;
+        }
+
+        .steps ol {
+            margin: 0;
+            padding-left: 20px;
+        }
+
+        .steps li {
+            margin-bottom: 8px;
+        }
+    </style>
+</head>
+<body>
+<div class="email-container">
+    <div class="header">
+        <h1>¡Bienvenido a {{ company_name }}!</h1>
+        <p>Hola {{ socio_name }}, tu cuenta ha sido creada exitosamente</p>
+    </div>
+
+    <p>Nos complace informarte que tu cuenta de usuario para acceder al sistema web de
+        <strong>{{ company_name }}</strong> ha sido creada exitosamente.</p>
+
+    <div class="credentials-box">
+        <h3>📋 Tus Credenciales de Acceso</h3>
+        <div class="credential-item">
+            <span class="credential-label">👤 Usuario:</span>
+            <span class="credential-value">{{ username }}</span>
+        </div>
+        <div class="credential-item">
+            <span class="credential-label">🔐 Contraseña Temporal:</span>
+            <span class="credential-value">{{ temporary_password }}</span>
+        </div>
+    </div>
+
+    <div class="security-notice">
+        <h4>⚠️ Importante - Seguridad</h4>
+        <p><strong>Esta es una contraseña temporal</strong> que deberás cambiar en tu primer inicio de sesión por
+            razones de seguridad.</p>
+        <p>Te recomendamos usar una contraseña segura que contenga:</p>
+        <ul>
+            <li>Al menos 8 caracteres</li>
+            <li>Letras mayúsculas y minúsculas</li>
+            <li>Números y símbolos</li>
+            <li>No uses información personal</li>
+        </ul>
+    </div>
+
+    <div class="steps">
+        <h4>🚀 Próximos Pasos</h4>
+        <ol>
+            <li>Haz clic en el botón "Iniciar Sesión" de abajo</li>
+            <li>Ingresa tu usuario y contraseña temporal</li>
+            <li>El sistema te pedirá cambiar tu contraseña</li>
+            <li>¡Comienza a usar todas las funcionalidades disponibles!</li>
+        </ol>
+    </div>
+
+    <div style="text-align: center;">
+        <a href="{{ login_url }}" class="login-button">
+            🔗 Iniciar Sesión Ahora
+        </a>
+    </div>
+
+    <div style="margin: 30px 0; padding: 20px; background-color: #d1ecf1; border-radius: 5px;">
+        <h4 style="color: #0c5460; margin-top: 0;">💡 ¿Necesitas Ayuda?</h4>
+        <p style="margin-bottom: 0;">Si tienes alguna duda o problema para acceder, no dudes en contactarnos:</p>
+        <p style="margin-bottom: 0;"><strong>📧 Email de Soporte:</strong> <a
+                href="mailto:{{ support_email }}">{{ support_email }}</a></p>
+    </div>
+
+    <div class="footer">
+        <p><strong>{{ company_name }}</strong></p>
+        <p>Este email fue enviado automáticamente. Por favor, no respondas a este mensaje.</p>
+        <p>Si no solicitaste esta cuenta, por favor contacta a nuestro equipo de soporte inmediatamente.</p>
+    </div>
+</div>
+</body>
+</html>

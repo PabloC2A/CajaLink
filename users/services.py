@@ -2,17 +2,22 @@
 
 import logging
 from typing import Tuple, Optional
-from django.db import transaction, IntegrityError
+
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 from django.core.validators import validate_email
+from django.db import transaction
+from django.dispatch import Signal
 from django.utils.crypto import get_random_string
 
 from legacy_models.models import Socio
-from .models import UserSocioLink
 from .enums import UserType
+from .models import UserSocioLink
 
 logger = logging.getLogger(__name__)
+
+# Signal personalizado para notificar creación con contraseña temporal
+user_created_with_temp_password = Signal()
 
 
 class UserTypeManager:
@@ -159,7 +164,8 @@ class UserCreationService:
             first_name: str = "",
             last_name: str = "",
             socio: Optional[Socio] = None,
-            is_active: bool = True
+            is_active: bool = True,
+            created_by: Optional[User] = None
     ) -> Tuple[User, Optional[str]]:
         """
         Crea usuario según su tipo con validaciones específicas.
@@ -175,6 +181,7 @@ class UserCreationService:
             last_name: Apellidos
             socio: Socio a vincular (solo para tipo SOCIO)
             is_active: Si el usuario está activo
+            created_by: Usuario que está creando esta cuenta
 
         Returns:
             Tuple[User, contraseña_temporal]:
@@ -211,6 +218,16 @@ class UserCreationService:
             cls._setup_staff_user(user)
         elif user_type == UserType.SUPERUSER:
             cls._setup_superuser(user)
+
+        # Paso 6: Enviar signal personalizado para usuarios SOCIO con contraseña temporal
+        if user_type == UserType.SOCIO and temp_password:
+            logger.info(f"Sending signal for user creation with temp password: {username}")
+            user_created_with_temp_password.send(
+                sender=cls,
+                user=user,
+                temp_password=temp_password,
+                created_by=created_by
+            )
 
         logger.info(f"User {username} created successfully as {user_type.value}")
         return user, temp_password
@@ -333,13 +350,13 @@ def create_web_user_for_socio(
         email: str,
         first_name: str,
         last_name: str,
+        created_by: Optional[User] = None
 ) -> Tuple[User, str]:
     """
     Función de compatibilidad para crear usuarios SOCIO.
     Mantiene la API existente para no romper código que la usa.
 
-    NOTA: Se recomienda migrar a UserCreationService.create_user_by_type()
-    para mejor manejo de errores y funcionalidades extendidas.
+    ACTUALIZACIÓN: Ahora incluye created_by para activar signals de email.
 
     Args:
         socio: La instancia del modelo Socio a vincular
@@ -347,6 +364,7 @@ def create_web_user_for_socio(
         email: Email para la nueva cuenta
         first_name: Nombres del usuario
         last_name: Apellidos del usuario
+        created_by: Usuario que está creando esta cuenta (NUEVO)
 
     Returns:
         Tuple[User, str]: Usuario creado y contraseña temporal
@@ -364,7 +382,8 @@ def create_web_user_for_socio(
             email=email,
             first_name=first_name,
             last_name=last_name,
-            socio=socio
+            socio=socio,
+            created_by=created_by  # NUEVO: Para activar signals de email
         )
 
         return user, temp_password
@@ -390,27 +409,54 @@ def get_user_display_info(user) -> dict:
     Returns:
         dict: Información del usuario para display
     """
-    user_type = UserType.get_user_type(user)
+    try:
+        user_type = UserType.get_user_type(user)
 
-    info = {
-        'username': user.username,
-        'full_name': user.get_full_name() or user.username,
-        'type': user_type.value,
-        'type_display': user_type.display_name,
-        'is_staff': user.is_staff,
-        'is_superuser': user.is_superuser,
-        'has_socio_link': False,
-        'socio_info': None
-    }
-
-    # Añadir info de socio si aplica
-    if user_type == UserType.SOCIO and hasattr(user, 'link') and user.link and user.link.socio:
-        info['has_socio_link'] = True
-        info['socio_info'] = {
-            'nombres': user.link.socio.nombres,
-            'apellidos': user.link.socio.apellidos,
-            'cedula': user.link.socio.cedula,
-            'cuenta': user.link.socio.cuenta
+        info = {
+            'username': user.username,
+            'full_name': user.get_full_name() or user.username,
+            'email': user.email,
+            'type': user_type.value,
+            'type_display': getattr(user_type, 'display_name', user_type.value),
+            'is_staff': user.is_staff,
+            'is_superuser': user.is_superuser,
+            'has_socio_link': False,
+            'socio_info': None,
+            'is_active': user.is_active,
+            'date_joined': user.date_joined,
         }
 
-    return info
+        # Añadir info de socio si aplica
+        if user_type == UserType.SOCIO:
+            try:
+                link = user.link
+                if link and link.socio:
+                    info['has_socio_link'] = True
+                    info['socio_info'] = {
+                        'id': link.socio.id,
+                        'nombres': link.socio.nombres,
+                        'apellidos': link.socio.apellidos,
+                        'cedula': getattr(link.socio, 'cedula', ''),
+                        'cuenta': getattr(link.socio, 'cuenta', ''),
+                        'must_change_password': link.must_change_password,
+                    }
+            except UserSocioLink.DoesNotExist:
+                pass
+
+        return info
+
+    except Exception as e:
+        logger.error(f"Error getting display info for user {user.username}: {e}")
+        return {
+            'username': user.username,
+            'full_name': user.username,
+            'email': user.email or '',
+            'type': 'UNKNOWN',
+            'type_display': 'Desconocido',
+            'is_staff': user.is_staff,
+            'is_superuser': user.is_superuser,
+            'has_socio_link': False,
+            'socio_info': None,
+            'is_active': user.is_active,
+            'date_joined': user.date_joined,
+        }

@@ -1,0 +1,39 @@
+¡Bienvenido a {{ company_name }}!
+=====================================
+
+Hola {{ socio_name }},
+
+Nos complace informarte que tu cuenta de usuario para acceder al sistema web de {{ company_name }} ha sido creada exitosamente.
+
+TUS CREDENCIALES DE ACCESO
+--------------------------
+👤 Usuario: {{ username }}
+🔐 Contraseña Temporal: {{ temporary_password }}
+
+⚠️ IMPORTANTE - SEGURIDAD
+-------------------------
+Esta es una contraseña temporal que deberás cambiar en tu primer inicio de sesión por razones de seguridad.
+
+Te recomendamos usar una contraseña segura que contenga:
+• Al menos 8 caracteres
+• Letras mayúsculas y minúsculas
+• Números y símbolos
+• No uses información personal
+
+PRÓXIMOS PASOS
+--------------
+1. Visita: {{ login_url }}
+2. Ingresa tu usuario y contraseña temporal
+3. El sistema te pedirá cambiar tu contraseña
+4. ¡Comienza a usar todas las funcionalidades disponibles!
+
+¿NECESITAS AYUDA?
+-----------------
+Si tienes alguna duda o problema para acceder, no dudes en contactarnos:
+📧 Email de Soporte: {{ support_email }}
+
+---
+{{ company_name }}
+
+Este email fue enviado automáticamente. Por favor, no respondas a este mensaje.
+Si no solicitaste esta cuenta, por favor contacta a nuestro equipo de soporte inmediatamente.

@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nuevo Usuario Creado - CajaLink</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f8f9fa;
+        }
+
+        .notification-container {
+            background-color: #ffffff;
+            border-radius: 8px;
+            padding: 25px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            border-left: 4px solid #28a745;
+        }
+
+        .header {
+            text-align: center;
+            border-bottom: 2px solid #28a745;
+            padding-bottom: 15px;
+            margin-bottom: 25px;
+        }
+
+        .header h1 {
+            color: #28a745;
+            margin: 0;
+            font-size: 24px;
+        }
+
+        .user-info {
+            background-color: #f8f9fa;
+            border-radius: 6px;
+            padding: 20px;
+            margin: 20px 0;
+            border-left: 3px solid #007bff;
+        }
+
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px dotted #dee2e6;
+        }
+
+        .info-row:last-child {
+            border-bottom: none;
+        }
+
+        .label {
+            font-weight: bold;
+            color: #495057;
+            width: 40%;
+        }
+
+        .value {
+            color: #212529;
+            width: 55%;
+            text-align: right;
+        }
+
+        .creation-info {
+            background-color: #e9ecef;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 20px 0;
+        }
+
+        .admin-button {
+            display: inline-block;
+            background-color: #007bff;
+            color: white;
+            text-decoration: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            font-weight: bold;
+            text-align: center;
+            margin: 15px 0;
+        }
+
+        .admin-button:hover {
+            background-color: #0056b3;
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 25px;
+            padding-top: 15px;
+            border-top: 1px solid #dee2e6;
+            color: #6c757d;
+            font-size: 14px;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        .status-active {
+            background-color: #d4edda;
+            color: #155724;
+        }
+
+        .status-inactive {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+    </style>
+</head>
+<body>
+<div class="notification-container">
+    <div class="header">
+        <h1>📋 Nuevo Usuario Creado</h1>
+        <p>Notificación para el equipo de administración</p>
+    </div>
+
+    <p><strong>Se ha creado un nuevo usuario en el sistema.</strong> A continuación se muestran los detalles:</p>
+
+    <div class="user-info">
+        <h3 style="margin-top: 0; color: #007bff;">👤 Información del Usuario</h3>
+
+        <div class="info-row">
+            <span class="label">Usuario:</span>
+            <span class="value"><strong>{{ created_user.username }}</strong></span>
+        </div>
+
+        <div class="info-row">
+            <span class="label">Nombre Completo:</span>
+            <span class="value">{{ created_user.first_name }} {{ created_user.last_name }}</span>
+        </div>
+
+        <div class="info-row">
+            <span class="label">Email:</span>
+            <span class="value">{{ created_user.email|default:"No especificado" }}</span>
+        </div>
+
+        {% if socio_name %}
+            <div class="info-row">
+                <span class="label">Socio Vinculado:</span>
+                <span class="value">{{ socio_name }}</span>
+            </div>
+        {% endif %}
+
+        <div class="info-row">
+            <span class="label">Estado:</span>
+            <span class="value">
+                    {% if created_user.is_active %}
+                        <span class="status-badge status-active">Activo</span>
+                    {% else %}
+                        <span class="status-badge status-inactive">Inactivo</span>
+                    {% endif %}
+                </span>
+        </div>
+
+        <div class="info-row">
+            <span class="label">Tipo de Usuario:</span>
+            <span class="value">
+                    {% if created_user.is_superuser %}
+                        Superusuario
+                    {% elif created_user.is_staff %}
+                        Personal (Staff)
+                    {% else %}
+                        Socio
+                    {% endif %}
+                </span>
+        </div>
+    </div>
+
+    <div class="creation-info">
+        <h4 style="margin-top: 0; color: #495057;">📅 Información de Creación</h4>
+        <p><strong>Fecha y Hora:</strong> {{ creation_time|date:"d/m/Y H:i:s" }}</p>
+        {% if created_by %}
+            <p><strong>Creado por:</strong> {{ created_by.username }}
+                ({{ created_by.first_name }} {{ created_by.last_name }})</p>
+        {% endif %}
+    </div>
+
+    <div style="background-color: #fff3cd; padding: 15px; border-radius: 5px; border-left: 3px solid #ffc107; margin: 20px 0;">
+        <h4 style="margin-top: 0; color: #856404;">ℹ️ Información Importante</h4>
+        <ul style="margin-bottom: 0; padding-left: 20px;">
+            <li>Se ha enviado un email de bienvenida al usuario con sus credenciales temporales</li>
+            <li>El usuario deberá cambiar su contraseña en el primer inicio de sesión</li>
+            <li>Puede gestionar este usuario desde el panel de administración</li>
+        </ul>
+    </div>
+
+    <div style="text-align: center;">
+        <a href="{{ admin_url }}" class="admin-button">
+            🔧 Ir al Panel de Administración
+        </a>
+    </div>
+
+    <div class="footer">
+        <p><strong>Sistema de Gestión CajaLink</strong></p>
+        <p>Esta es una notificación automática del sistema. No es necesario responder a este email.</p>
+    </div>
+</div>
+</body>
+</html>

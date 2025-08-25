@@ -1,0 +1,28 @@
+NUEVO USUARIO CREADO - NOTIFICACIÓN STAFF
+=========================================
+
+Se ha creado un nuevo usuario en el sistema CajaLink.
+
+INFORMACIÓN DEL USUARIO
+-----------------------
+👤 Usuario: {{ created_user.username }}
+📝 Nombre: {{ created_user.first_name }} {{ created_user.last_name }}
+📧 Email: {{ created_user.email|default:"No especificado" }}
+{% if socio_name %}👥 Socio Vinculado: {{ socio_name }}{% endif %}
+📊 Estado: {% if created_user.is_active %}Activo{% else %}Inactivo{% endif %}
+🏷️ Tipo: {% if created_user.is_superuser %}Superusuario{% elif created_user.is_staff %}Personal (Staff){% else %}Socio{% endif %}
+
+INFORMACIÓN DE CREACIÓN
+-----------------------
+📅 Fecha y Hora: {{ creation_time|date:"d/m/Y H:i:s" }}
+{% if created_by %}👨‍💼 Creado por: {{ created_by.username }} ({{ created_by.first_name }} {{ created_by.last_name }}){% endif %}
+
+INFORMACIÓN IMPORTANTE
+----------------------
+✅ Se ha enviado un email de bienvenida al usuario con sus credenciales temporales
+🔒 El usuario deberá cambiar su contraseña en el primer inicio de sesión
+🔧 Puede gestionar este usuario desde el panel de administración: {{ admin_url }}
+
+---
+Sistema de Gestión CajaLink
+Esta es una notificación automática del sistema.

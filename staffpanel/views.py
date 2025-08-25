@@ -110,8 +110,6 @@ class LinkSocioCreateUserView(StaffRequiredMixin, FormView):
     def form_valid(self, form):
         """
         Procesa el formulario con manejo robusto de errores.
-
-        Mejora: Manejo específico de diferentes tipos de errores.
         """
         socio = get_object_or_404(Socio, id=self.kwargs.get('socio_id'))
         data = form.cleaned_data
@@ -122,14 +120,22 @@ class LinkSocioCreateUserView(StaffRequiredMixin, FormView):
                 username=data['username'],
                 email=data.get('email') or socio.email,
                 first_name=socio.nombres,
-                last_name=socio.apellidos
+                last_name=socio.apellidos,
+                created_by=self.request.user  # NUEVO: Para activar signals de email
             )
 
-            messages.success(
-                self.request,
+            # Mensaje actualizado con información sobre el email
+            success_message = (
                 f"✅ Usuario web '{new_user.username}' creado exitosamente para "
-                f"{socio.nombres} {socio.apellidos}. Contraseña temporal: {temp_password}"
+                f"{socio.nombres} {socio.apellidos}."
             )
+
+            if new_user.email:
+                success_message += f" Se ha enviado un email de bienvenida a {new_user.email} con las credenciales de acceso."
+            else:
+                success_message += f" Contraseña temporal: {temp_password}"
+
+            messages.success(self.request, success_message)
 
         except ValidationError as e:
             # Error de validación específico

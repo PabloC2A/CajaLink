@@ -22,18 +22,7 @@ from .forms import (
     CreditProductFilterForm, AmortizationScheduleForm
 )
 from .services import CreditSimulationService, CreditProductService
-
-
-class StaffRequiredMixin(UserPassesTestMixin):
-    """Mixin que requiere que el usuario sea staff."""
-
-    def test_func(self):
-        return self.request.user.is_staff
-
-    def handle_no_permission(self):
-        if self.request.user.is_authenticated:
-            raise PermissionDenied("No tienes permisos para acceder a esta sección.")
-        return super().handle_no_permission()
+from users.mixins import StaffRequiredMixin
 
 
 # =============================================================================

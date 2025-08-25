@@ -3,6 +3,8 @@
 from django.contrib import messages
 from django.contrib.auth.mixins import UserPassesTestMixin
 from django.contrib.auth.models import User
+from django.core.exceptions import ValidationError
+from django.db import IntegrityError
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse_lazy
 from django.utils import timezone
@@ -12,17 +14,9 @@ from django.views.generic import ListView, FormView, TemplateView
 from credit_simulator.models import CreditProduct, CreditSimulation
 from legacy_models.models import Socio, AhorroHistorial
 from users.services import create_web_user_for_socio
+from users.mixins import StaffRequiredMixin, logger
 from .forms import WebUserLinkForm
 from .selectors import get_unified_socio_list
-
-
-class StaffRequiredMixin(UserPassesTestMixin):
-    """
-    Mixin que asegura que solo los usuarios marcados como 'staff' puedan acceder a la vista.
-    """
-
-    def test_func(self):
-        return self.request.user.is_staff
 
 
 class StaffDashboardView(StaffRequiredMixin, TemplateView):
@@ -81,20 +75,6 @@ class UserListView(StaffRequiredMixin, ListView):
         """
         context = super().get_context_data(**kwargs)
         context['search_query'] = self.request.GET.get('q', '')
-
-        # Estadísticas para mejorar UX (usando el selector para consistencia)
-        all_socios = get_unified_socio_list()
-        linked_count = sum(1 for socio in all_socios if socio.is_linked)
-        total_count = all_socios.count()
-
-        context.update({
-            'stats': {
-                'total_socios': total_count,
-                'linked_count': linked_count,
-                'unlinked_count': total_count - linked_count
-            }
-        })
-
         return context
 
 
@@ -129,9 +109,11 @@ class LinkSocioCreateUserView(StaffRequiredMixin, FormView):
 
     def form_valid(self, form):
         """
-        Procesa el formulario válido delegando la lógica de negocio al service.
+        Procesa el formulario con manejo robusto de errores.
+
+        Mejora: Manejo específico de diferentes tipos de errores.
         """
-        socio = self._get_socio()
+        socio = get_object_or_404(Socio, id=self.kwargs.get('socio_id'))
         data = form.cleaned_data
 
         try:
@@ -142,16 +124,31 @@ class LinkSocioCreateUserView(StaffRequiredMixin, FormView):
                 first_name=socio.nombres,
                 last_name=socio.apellidos
             )
+
             messages.success(
                 self.request,
-                f"Usuario web '{new_user.username}' creado y vinculado a {socio.nombres} {socio.apellidos}. "
-                f"Contraseña temporal: {temp_password}"
+                f"✅ Usuario web '{new_user.username}' creado exitosamente para "
+                f"{socio.nombres} {socio.apellidos}. Contraseña temporal: {temp_password}"
             )
+
+        except ValidationError as e:
+            # Error de validación específico
+            messages.error(self.request, f"Error de validación: {e}")
+            logger.warning(f"Validation error creating user for socio {socio.id}: {e}")
+            return self.form_invalid(form)
+
+        except IntegrityError as e:
+            # Error de integridad de BD (username duplicado, etc.)
+            messages.error(self.request, "El nombre de usuario ya existe en el sistema.")
+            logger.warning(f"Integrity error creating user for socio {socio.id}: {e}")
+            return self.form_invalid(form)
+
         except Exception as e:
-            messages.error(
-                self.request,
-                f"Ocurrió un error inesperado al vincular el usuario: {e}"
-            )
+            # Error inesperado
+            messages.error(self.request, "Error del sistema. Contacte al administrador.")
+            logger.error(f"Unexpected error creating user for socio {socio.id}: {e}", exc_info=True)
+            return self.form_invalid(form)
+
         return super().form_valid(form)
 
     def _get_socio(self):

@@ -9,43 +9,28 @@ from django.utils import timezone
 
 from legacy_models.models import Socio, AhorroHistorial, Credito, CreditoCuota, CertificadoHistorial, CreditoHistorial
 from credit_simulator.models import CreditProduct, CreditSimulation
+from users.mixins import SocioRequiredMixin
 
 
-class SocioDataMixin(LoginRequiredMixin):
+class DashboardView(SocioRequiredMixin, TemplateView):
     """
-    Mixin reutilizable que obtiene el registro 'Socio' vinculado al
-    usuario web autenticado.
-    """
-
-    def dispatch(self, request, *args, **kwargs):
-        self.socio = get_object_or_404(Socio, usersociolink__user=request.user)
-        return super().dispatch(request, *args, **kwargs)
-
-
-class DashboardView(SocioDataMixin, TemplateView):
-    """
-    Vista principal del dashboard rediseñado según la imagen.
+    Vista principal del dashboard
     """
     template_name = 'userpanel/dashboard.html'
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
-        # Datos de Ahorros - mostrar número de cuenta
         ahorros_data = {
             'numero_cuenta': self.socio.cuenta,
             'saldo_disponible': self.socio.efectivo or Decimal('0.00'),
         }
 
-        # Datos de Certificados - mostrar cantidad activa
         certificados_data = {
             'cantidad_activa': self.socio.certifica or Decimal('0.00'),
         }
 
-        # Datos de Créditos - mostrar cuota a pagar y fecha de vencimiento
         creditos_data = self._get_creditos_data()
-
-        # Datos de Plazos Fijos - calcular inversión total
         plazos_data = self._get_plazos_data()
 
         context.update({
@@ -121,7 +106,7 @@ class DashboardView(SocioDataMixin, TemplateView):
 
 # Resto de vistas existentes se mantienen igual...
 
-class AhorroHistorialView(SocioDataMixin, ListView):
+class AhorroHistorialView(SocioRequiredMixin, ListView):
     model = AhorroHistorial
     template_name = 'userpanel/ahorro_historial.html'
     context_object_name = 'transactions'
@@ -136,7 +121,7 @@ class AhorroHistorialView(SocioDataMixin, ListView):
         return context
 
 
-class CertificadoHistorialView(SocioDataMixin, ListView):
+class CertificadoHistorialView(SocioRequiredMixin, ListView):
     model = CertificadoHistorial
     template_name = 'userpanel/certificado_historial.html'
     context_object_name = 'transactions'
@@ -151,7 +136,7 @@ class CertificadoHistorialView(SocioDataMixin, ListView):
         return context
 
 
-class CreditoDetailView(SocioDataMixin, DetailView):
+class CreditoDetailView(SocioRequiredMixin, DetailView):
     """
     Vista de detalle de crédito que muestra información completa del crédito.
 
@@ -300,7 +285,7 @@ class CreditoDetailView(SocioDataMixin, DetailView):
         return pending_installments[0]
 
 
-class CreditoHistorialView(SocioDataMixin, ListView):
+class CreditoHistorialView(SocioRequiredMixin, ListView):
     model = Credito
     template_name = 'userpanel/credito_historial.html'
     context_object_name = 'credits'
@@ -333,7 +318,7 @@ class CreditoHistorialView(SocioDataMixin, ListView):
         return context
 
 
-class SimulatorIntegrationView(SocioDataMixin, TemplateView):
+class SimulatorIntegrationView(SocioRequiredMixin, TemplateView):
     """
     Vista que muestra información específica del simulador de créditos
     contextualizada para el socio actual.

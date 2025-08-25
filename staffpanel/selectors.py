@@ -8,11 +8,6 @@ def get_unified_socio_list(search_query: str = '') -> 'QuerySet[Socio]':
     """
     Selector que obtiene una lista unificada de socios con información de vinculación.
 
-    Implementa:
-    - Single Responsibility: Solo se encarga de construir la consulta
-    - DRY: Centraliza la lógica de consulta unificada
-    - High Cohesion: Agrupa toda la lógica relacionada con la consulta
-
     Args:
         search_query: Término de búsqueda opcional
 

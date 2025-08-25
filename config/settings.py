@@ -47,6 +47,7 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'users.middleware.ForcePasswordChangeMiddleware',
+    'core.middleware.SubdomainDetectionMiddleware',
 ]
 
 # --- URLs y Plantillas ---
@@ -62,6 +63,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'core.context_processors.company_context',
             ],
         },
     },
@@ -104,7 +106,7 @@ LOGIN_URL = '/accounts/login/'
 
 # --- Configuración Correo ---#
 EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
-#EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
+# EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 
 EMAIL_HOST = config('EMAIL_HOST')
 EMAIL_PORT = config('EMAIL_PORT', cast=int)
@@ -123,3 +125,34 @@ if not DEBUG:
     SECURE_HSTS_SECONDS = 31536000  # 1 año
     SECURE_HSTS_INCLUDE_SUBDOMAINS = True
     SECURE_HSTS_PRELOAD = True
+
+# --- Configuraciones por defecto para empresa principal ---
+DEFAULT_COMPANY_NAME = 'ByteAndino'
+DEFAULT_SHORT_NAME = 'ByteAndino'
+DEFAULT_SITE_TITLE = 'Financial Link - Banca Web'
+DEFAULT_EMAIL = 'soporte@byteandino.com'
+DEFAULT_PHONE = '+593-0980520307'
+DEFAULT_ADDRESS = 'Loja, Loja, Ecuador'
+DEFAULT_WEBSITE = 'byteandino.com'
+DEFAULT_LOGO_URL = None
+DEFAULT_PRIMARY_COLOR = '#007bff'
+DEFAULT_SECONDARY_COLOR = '#6c757d'
+DEFAULT_WELCOME_MESSAGE = 'Bienvenido a la Banca Web.'
+DEFAULT_FOOTER_TEXT = 'Sistema de Banca Web'
+
+# --- Configuración de Cache (añadir si no existe) ---
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+        'LOCATION': 'unique-snowflake',
+        'TIMEOUT': 3600,  # 1 hora
+        'OPTIONS': {
+            'MAX_ENTRIES': 1000,
+            'CULL_FREQUENCY': 3,
+        }
+    }
+}
+
+# --- Configuración de archivos media (para logos) ---
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'

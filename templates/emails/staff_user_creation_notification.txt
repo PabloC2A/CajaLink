@@ -1,7 +1,7 @@
 NUEVO USUARIO CREADO - NOTIFICACIÓN STAFF
 =========================================
 
-Se ha creado un nuevo usuario en el sistema CajaLink.
+Se ha creado un nuevo usuario en el sistema {{ company.company_name }}.
 
 INFORMACIÓN DEL USUARIO
 -----------------------
@@ -24,5 +24,5 @@ INFORMACIÓN IMPORTANTE
 🔧 Puede gestionar este usuario desde el panel de administración: {{ admin_url }}
 
 ---
-Sistema de Gestión CajaLink
+Sistema de Gestión {{ company.company_name }}
 Esta es una notificación automática del sistema.

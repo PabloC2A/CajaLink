@@ -32,7 +32,7 @@ class BaseEmailService:
     @classmethod
     def _get_company_name(cls) -> str:
         """Obtiene el nombre de la empresa."""
-        return getattr(settings, 'COMPANY_NAME', 'CajaLink')
+        return getattr(settings, 'COMPANY_NAME', 'ByteAndino')
 
     @classmethod
     def _get_admin_url(cls) -> str:
@@ -43,7 +43,7 @@ class BaseEmailService:
     @classmethod
     def _get_from_email(cls) -> str:
         """Obtiene el email remitente."""
-        return getattr(settings, 'DEFAULT_FROM_EMAIL', 'noreply@cajalink.com')
+        return getattr(settings, 'DEFAULT_FROM_EMAIL', 'noreply@refse.org')
 
     @classmethod
     def _send_email(

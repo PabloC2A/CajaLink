@@ -1,10 +1,11 @@
-# config/urls.py
+# config/urls.py - VERSIÓN ACTUALIZADA
 
 from django.contrib import admin
 from django.urls import path, include
+from django.conf import settings
+from django.conf.urls.static import static
 from core.views import HomePageView
 from django.views.generic import TemplateView
-from django.conf import settings
 
 urlpatterns = [
     # Ruta para el panel de administración de Django
@@ -27,7 +28,9 @@ urlpatterns = [
     path('accounts/', include('users.urls')),
 ]
 
+# Servir archivos media en desarrollo
 if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
     urlpatterns += [
         path('test-404/', TemplateView.as_view(template_name='404.html')),
         path('test-403/', TemplateView.as_view(template_name='403.html')),

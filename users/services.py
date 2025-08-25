@@ -2,21 +2,21 @@
 
 import logging
 from typing import Tuple, Optional
-
+from django.db import transaction, IntegrityError
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 from django.core.validators import validate_email
-from django.db import transaction
-from django.dispatch import Signal
 from django.utils.crypto import get_random_string
+from django.dispatch import Signal
 
 from legacy_models.models import Socio
-from .enums import UserType
 from .models import UserSocioLink
+from .enums import UserType
 
 logger = logging.getLogger(__name__)
 
 # Signal personalizado para notificar creación con contraseña temporal
+# MOVIDO AQUÍ para evitar importación circular
 user_created_with_temp_password = Signal()
 
 
@@ -137,7 +137,7 @@ class UserTypeManager:
         elif user_type in [UserType.SUPERUSER, UserType.STAFF]:
             if socio:
                 raise ValidationError(
-                    f"Los usuarios {user_type.display_name} no deben tener socio vinculado"
+                    f"Los usuarios {getattr(user_type, 'display_name', user_type.value)} no deben tener socio vinculado"
                 )
 
         logger.debug(f"User creation validation passed for type {user_type.value}")
@@ -220,14 +220,19 @@ class UserCreationService:
             cls._setup_superuser(user)
 
         # Paso 6: Enviar signal personalizado para usuarios SOCIO con contraseña temporal
+        # CORREGIDO: Enviamos signal después de que el usuario esté completamente configurado
         if user_type == UserType.SOCIO and temp_password:
             logger.info(f"Sending signal for user creation with temp password: {username}")
+
+            # Enviar signal con toda la información necesaria
             user_created_with_temp_password.send(
                 sender=cls,
                 user=user,
                 temp_password=temp_password,
                 created_by=created_by
             )
+
+            logger.debug(f"Signal sent successfully for user {username}")
 
         logger.info(f"User {username} created successfully as {user_type.value}")
         return user, temp_password

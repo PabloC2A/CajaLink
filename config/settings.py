@@ -72,7 +72,7 @@ WSGI_APPLICATION = 'config.wsgi.application'
 # Usa la DATABASE_URL de Render en producción, o un archivo SQLite local por defecto.
 DATABASES = {
     'default': dj_database_url.config(
-        default=config('DATABASE_URL'),  # Lee la URL del .env
+        default=config('DATABASE_URL'),
         conn_max_age=600
     )
 }
@@ -101,6 +101,19 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 LOGIN_REDIRECT_URL = '/accounts/redirect/'
 LOGOUT_REDIRECT_URL = '/accounts/login/'
 LOGIN_URL = '/accounts/login/'
+
+# --- Configuración Correo ---#
+# EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
+
+EMAIL_HOST = config('EMAIL_HOST')
+EMAIL_PORT = config('EMAIL_PORT', cast=int)
+EMAIL_USE_TLS = config('EMAIL_USE_TLS', cast=bool)
+EMAIL_USE_SSL = config('EMAIL_USE_SSL', cast=bool)
+
+EMAIL_HOST_USER = config('EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD')
+DEFAULT_FROM_EMAIL = config('DEFAULT_FROM_EMAIL')
 
 # --- CONFIGURACIÓN ADICIONAL PARA PRODUCCIÓN ---
 if not DEBUG:

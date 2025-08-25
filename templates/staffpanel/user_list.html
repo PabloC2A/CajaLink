@@ -1,15 +1,10 @@
 {% extends "layouts/base_staff.html" %}
 
-{% block title %}Usuarios Web Creados - CajaLink{% endblock %}
+{% block title %}Usuarios - CajaLink{% endblock %}
 
 {% block main_content %}
     <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
         <h1 class="h2"><i class="bi bi-people me-2"></i>Usuarios Web de Socios</h1>
-        <div class="btn-toolbar mb-2 mb-md-0">
-            <a href="{% url 'staffpanel:link_socio_search' %}" class="btn btn-success">
-                <i class="bi bi-plus-circle-fill me-1"></i> Vincular Nuevo Usuario Web
-            </a>
-        </div>
     </div>
 
     {% if messages %}
@@ -24,15 +19,38 @@
 
     <div class="card shadow-sm">
         <div class="card-body">
+
+            <!-- 🔎 Barra de búsqueda -->
+            <form method="get" class="row g-2 mb-3">
+                <div class="col-md-8 col-lg-6">
+                    <div class="input-group">
+                        <span class="input-group-text bg-white"><i class="bi bi-search"></i></span>
+                        <input type="text" name="q" value="{{ request.GET.q }}" class="form-control"
+                               placeholder="Buscar por nombre, cédula o email...">
+                    </div>
+                </div>
+                <div class="col-auto">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-search"></i> Buscar
+                    </button>
+                </div>
+                <div class="col-auto ms-2">
+                    <a href="{% url 'staffpanel:link_socio_search' %}" class="btn btn-success">
+                        <i class="bi bi-person-plus-fill"></i> Crear Usuario
+                    </a>
+                </div>
+            </form>
+
+            <!-- 📋 Tabla de usuarios -->
             <div class="table-responsive">
                 <table class="table table-hover align-middle">
                     <thead class="table-light">
                     <tr>
-                        <th>Usuario Web</th>
-                        <th>Nombre Completo (Socio)</th>
+                        <th>Usuario</th>
+                        <th>Nombre Completo</th>
                         <th>Email</th>
-                        <th>Cédula (Socio)</th>
-                        <th>Estado Web</th>
+                        <th>Cédula</th>
+                        <th>Estado</th>
                         <th class="text-center">Acciones</th>
                     </tr>
                     </thead>

@@ -123,8 +123,7 @@ class LinkSocioCreateUserView(StaffRequiredMixin, FormView):
 
     def get_initial(self):
         """
-        Pre-rellena el formulario con datos del Socio para facilitar la tarea
-        al empleado.
+        Pre-rellena el formulario con datos del Socio para facilitar la tarea al empleado
         """
         socio = get_object_or_404(Socio, id=self.kwargs.get('socio_id'))
         initial = super().get_initial()

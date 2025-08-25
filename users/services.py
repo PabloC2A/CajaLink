@@ -2,16 +2,15 @@
 
 import logging
 from typing import Tuple, Optional
-
+from django.db import transaction, IntegrityError
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 from django.core.validators import validate_email
-from django.db import transaction
 from django.utils.crypto import get_random_string
 
 from legacy_models.models import Socio
-from .enums import UserType
 from .models import UserSocioLink
+from .enums import UserType
 
 logger = logging.getLogger(__name__)
 
@@ -265,12 +264,24 @@ class UserCreationService:
         user.set_password(temp_password)
         user.save()
 
-        # Crear vinculación con socio EXPLÍCITAMENTE (no depender de signals)
-        UserSocioLink.objects.create(
+        # Crear vinculación con socio EXPLÍCITAMENTE
+        # Usar get_or_create para evitar duplicados por si signal ya creó uno
+        link, created = UserSocioLink.objects.get_or_create(
             user=user,
-            socio=socio,
-            must_change_password=True  # Forzar cambio en primer login
+            defaults={
+                'socio': socio,
+                'must_change_password': True
+            }
         )
+
+        # Si ya existía (por signal), actualizarlo con el socio
+        if not created:
+            link.socio = socio
+            link.must_change_password = True
+            link.save()
+            logger.debug(f"Updated existing UserSocioLink for user {user.username}")
+        else:
+            logger.debug(f"Created new UserSocioLink for user {user.username}")
 
         logger.info(f"Socio user {user.username} linked to socio {socio.id}")
         return temp_password

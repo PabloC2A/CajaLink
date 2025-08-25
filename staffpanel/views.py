@@ -110,49 +110,65 @@ class LinkSocioCreateUserView(StaffRequiredMixin, FormView):
     def form_valid(self, form):
         """
         Procesa el formulario con manejo robusto de errores.
+
+        CORREGIDO: Manejo claro de contraseña y mensaje de email.
         """
         socio = get_object_or_404(Socio, id=self.kwargs.get('socio_id'))
         data = form.cleaned_data
 
         try:
+            # Log para debugging
+            logger.info(f"Creating user for socio {socio.id} by staff {self.request.user.username}")
+
             new_user, temp_password = create_web_user_for_socio(
                 socio=socio,
                 username=data['username'],
                 email=data.get('email') or socio.email,
                 first_name=socio.nombres,
                 last_name=socio.apellidos,
-                created_by=self.request.user  # NUEVO: Para activar signals de email
+                created_by=self.request.user
             )
 
-            # Mensaje actualizado con información sobre el email
+            # Log de la contraseña generada para verificar coincidencia
+            logger.info(f"🔑 Generated temp password for {new_user.username}: {temp_password[:3]}***")
+
+            # Mensaje de éxito personalizado según si tiene email o no
             success_message = (
                 f"✅ Usuario web '{new_user.username}' creado exitosamente para "
                 f"{socio.nombres} {socio.apellidos}."
             )
 
             if new_user.email:
-                success_message += f" Se ha enviado un email de bienvenida a {new_user.email} con las credenciales de acceso."
+                success_message += (
+                    f"\n📧 Se ha enviado un email de bienvenida a {new_user.email} "
+                    f"con el usuario y contraseña temporal."
+                )
+                logger.info(f"📧 User {new_user.username} has email: {new_user.email}")
             else:
-                success_message += f" Contraseña temporal: {temp_password}"
+                success_message += (
+                    f"\n🔑 Contraseña temporal: {temp_password} "
+                    f"(compártela manualmente ya que no se especificó email)"
+                )
+                logger.info(f"⚠️ User {new_user.username} has no email, showing password in message")
 
             messages.success(self.request, success_message)
 
         except ValidationError as e:
             # Error de validación específico
-            messages.error(self.request, f"Error de validación: {e}")
             logger.warning(f"Validation error creating user for socio {socio.id}: {e}")
+            messages.error(self.request, f"Error de validación: {e}")
             return self.form_invalid(form)
 
         except IntegrityError as e:
             # Error de integridad de BD (username duplicado, etc.)
-            messages.error(self.request, "El nombre de usuario ya existe en el sistema.")
             logger.warning(f"Integrity error creating user for socio {socio.id}: {e}")
+            messages.error(self.request, "El nombre de usuario ya existe en el sistema.")
             return self.form_invalid(form)
 
         except Exception as e:
             # Error inesperado
-            messages.error(self.request, "Error del sistema. Contacte al administrador.")
             logger.error(f"Unexpected error creating user for socio {socio.id}: {e}", exc_info=True)
+            messages.error(self.request, "Error del sistema. Contacte al administrador.")
             return self.form_invalid(form)
 
         return super().form_valid(form)

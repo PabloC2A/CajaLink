@@ -127,18 +127,11 @@ class WelcomeEmailService(BaseEmailService):
         """
         Envía email de bienvenida con credenciales temporales.
 
-        Template Method Pattern: Usa estructura base de envío.
-
-        Args:
-            user: Usuario creado
-            temporary_password: Contraseña temporal generada
-            socio_name: Nombre del socio (para personalización)
-
-        Returns:
-            bool: True si el email se envió exitosamente, False en caso contrario
+        MEJORADO: Logging detallado para debug de contraseña.
         """
         try:
-            logger.info(f"Sending welcome email to user: {user.username} ({user.email})")
+            logger.info(f"📧 Sending welcome email to user: {user.username} ({user.email})")
+            logger.info(f"🔑 Using temp password: {temporary_password[:3]}*** (length: {len(temporary_password)})")
 
             # Validaciones previas
             if not cls._validate_email_requirements(user, require_email=True):
@@ -147,10 +140,17 @@ class WelcomeEmailService(BaseEmailService):
             # Preparar contexto para los templates
             context = cls._build_welcome_email_context(user, temporary_password, socio_name)
 
+            # Log del contexto para verificar
+            logger.debug(
+                f"📋 Email context - username: {context['username']}, password: {context['temporary_password'][:3]}***")
+
             # Generar contenido del email
             subject = cls._generate_welcome_subject()
             html_content = cls._render_welcome_html_template(context)
             plain_content = cls._render_welcome_text_template(context)
+
+            # Log del contenido generado (parcial)
+            logger.debug(f"📄 Email content preview: {plain_content[:200]}...")
 
             # Enviar email usando metodo base
             success = cls._send_email(
@@ -161,14 +161,14 @@ class WelcomeEmailService(BaseEmailService):
             )
 
             if success:
-                logger.info(f"Welcome email sent successfully to {user.email}")
+                logger.info(f"✅ Welcome email sent successfully to {user.email}")
                 return True
             else:
-                logger.error(f"Failed to send welcome email to {user.email}")
+                logger.error(f"❌ Failed to send welcome email to {user.email}")
                 return False
 
         except Exception as e:
-            logger.error(f"Error sending welcome email to {user.username}: {str(e)}", exc_info=True)
+            logger.error(f"❌ Error sending welcome email to {user.username}: {str(e)}", exc_info=True)
             return False
 
     @classmethod

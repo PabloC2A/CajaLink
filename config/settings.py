@@ -119,28 +119,14 @@ DEFAULT_FROM_EMAIL = config('DEFAULT_FROM_EMAIL')
 
 # --- CONFIGURACIÓN ADICIONAL PARA PRODUCCIÓN ---
 if not DEBUG:
-    SECURE_SSL_REDIRECT = True
+    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
     SESSION_COOKIE_SECURE = True
     CSRF_COOKIE_SECURE = True
-    SECURE_HSTS_SECONDS = 31536000  # 1 año
-    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
-    SECURE_HSTS_PRELOAD = True
+    # SECURE_HSTS_SECONDS = 31536000
+    # SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+    # SECURE_HSTS_PRELOAD = True
 
-# --- Configuraciones por defecto para empresa principal ---
-DEFAULT_COMPANY_NAME = 'ByteAndino'
-DEFAULT_SHORT_NAME = 'ByteAndino'
-DEFAULT_SITE_TITLE = 'Financial Link - Banca Web'
-DEFAULT_EMAIL = 'soporte@byteandino.com'
-DEFAULT_PHONE = '+593-0980520307'
-DEFAULT_ADDRESS = 'Loja, Loja, Ecuador'
-DEFAULT_WEBSITE = 'byteandino.com'
-DEFAULT_LOGO_URL = None
-DEFAULT_PRIMARY_COLOR = '#007bff'
-DEFAULT_SECONDARY_COLOR = '#6c757d'
-DEFAULT_WELCOME_MESSAGE = 'Bienvenido a la Banca Web.'
-DEFAULT_FOOTER_TEXT = 'Sistema de Banca Web'
-
-# --- Configuración de Cache (añadir si no existe) ---
+# --- Configuración de Cache ---
 CACHES = {
     'default': {
         'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',

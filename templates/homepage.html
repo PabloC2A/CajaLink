@@ -1,433 +1,371 @@
 {% extends "layouts/base_public.html" %}
-{% block title %}Bienvenido a Financial Link{% endblock %}
+{% load static %}
+{% block title %}Portal · {% firstof company.company_name "Entidad" %}{% endblock %}
+
 {% block main_content %}
-    <!-- Hero Section -->
-    <section class="hero-section position-relative overflow-hidden">
-        <div class="hero-background"></div>
-        <div class="hero-overlay"></div>
-        <div class="container position-relative z-3">
-            <div class="row align-items-center min-vh-100 py-5">
+
+    <!-- ========== INICIO / HERO (lenguaje simple) ========== -->
+    <section id="inicio" class="position-relative overflow-hidden hero-section py-5 py-lg-6">
+        <div class="container position-relative z-1">
+            <div class="row g-5 align-items-center">
                 <div class="col-lg-6">
-                    <div class="hero-content text-white">
-                        <div class="hero-badge mb-4">
-                            <i class="bi bi-bank2 me-2"></i>
-                            Tu Caja Digital
+                    <header class="text-white">
+                        <div class="d-inline-flex align-items-center gap-2 px-3 py-2 rounded-pill bg-white bg-opacity-10 border border-white border-opacity-25 mb-3">
+                            {% if company and company.logo_url %}
+                                <img src="{{ company.logo_url }}"
+                                     alt="Logo {% firstof company.company_name 'Entidad' %}"
+                                     width="28" height="28" class="rounded-circle object-fit-cover">
+                            {% else %}
+                                <i class="bi bi-bank2 text-white fs-5" aria-hidden="true"></i>
+                                <span class="visually-hidden">Logo</span>
+                            {% endif %}
+                            <span class="small">Su socio financiero en la comunidad.</span>
                         </div>
-                        <h1 class="display-3 fw-bold mb-4 hero-title">
-                            Bienvenido a
-                            <span class="text-gradient">{{ company.company_name }}</span>
+
+                        <h1 class="display-4 fw-bold mb-3">
+                            Bienvenido a {% firstof company.company_name "Entidad" %}.
                         </h1>
-                        <p class="lead mb-5 hero-subtitle">
-                            Tu portal digital para consultar los productos y servicios de tu cooperativa.
-                            Accede a tu información de forma fácil, rápida y segura.
+                        <p class="lead mb-4">
+                            Productos y servicios de ahorro y crédito pensados para usted y su familia.
                         </p>
-                        <div class="hero-actions">
-                            <a href="#" class="btn btn-light btn-lg rounded-pill px-4 py-3 me-3 mb-3">
-                                <i class="bi bi-box-arrow-in-right me-2"></i>
-                                Iniciar Sesión
+
+                        <div class="d-flex flex-wrap gap-3">
+                            <!-- NO TOCAR -->
+                            <a href="{% url 'users:login' %}"
+                               class="btn btn-warning btn-lg rounded-pill px-4 text-dark fw-bold shadow-sm">
+                                <i class="bi bi-person-lock me-2"></i>Ingresar a Banca Web
                             </a>
-                            <a href="#servicios" class="btn btn-outline-light btn-lg rounded-pill px-4 py-3 mb-3">
-                                <i class="bi bi-arrow-down me-2"></i>
-                                Conocer Más
+                            <a href="#productos" class="btn btn-outline-light btn-lg rounded-pill px-4">
+                                <i class="bi bi-grid me-2"></i> Ver productos
                             </a>
                         </div>
-                    </div>
-                </div>
-                <div class="col-lg-6">
-                    <div class="hero-visual text-center">
-                        <div class="floating-card">
-                            <div class="card border-0 shadow-lg">
-                                <div class="card-body p-4">
-                                    <div class="d-flex align-items-center justify-content-between mb-3">
-                                        <div>
-                                            <h6 class="mb-0">Mi Cuenta</h6>
-                                            <small class="text-muted">Saldo disponible</small>
-                                        </div>
-                                        <i class="bi bi-wallet2 text-primary fs-3"></i>
-                                    </div>
-                                    <h3 class="text-primary mb-0">$12,850.50</h3>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="floating-icons">
-                            <div class="floating-icon icon-1">
-                                <i class="bi bi-shield-check"></i>
-                            </div>
-                            <div class="floating-icon icon-2">
-                                <i class="bi bi-graph-up"></i>
-                            </div>
-                            <div class="floating-icon icon-3">
-                                <i class="bi bi-credit-card"></i>
-                            </div>
-                        </div>
-                    </div>
+
+                        <ul class="list-inline mt-4 small text-white-75 mb-0">
+                            <li class="list-inline-item me-3"><i class="bi bi-patch-check-fill me-1"></i> Supervisada
+                                por SEPS
+                            </li>
+                            <li class="list-inline-item"><i class="bi bi-shield-lock-fill me-1"></i> Datos protegidos
+                            </li>
+                        </ul>
+                    </header>
                 </div>
             </div>
         </div>
-        <div class="scroll-indicator">
-            <div class="scroll-arrow"></div>
-        </div>
     </section>
 
-    <!-- Services Section -->
-    <section id="servicios" class="py-5 bg-light">
+    <!-- ========== PRODUCTOS (lenguaje simple) ========== -->
+    <section id="productos" class="py-6">
         <div class="container">
             <div class="text-center mb-5">
-                <h2 class="display-5 fw-bold text-dark mb-3">¿Por qué elegir Financial Link?</h2>
-                <p class="lead text-muted col-lg-8 mx-auto">
-                    Ofrecemos una experiencia bancaria digital completa con la confianza y seguridad que necesitas
-                </p>
+                <h2 class="display-6 fw-bold mb-1">Lo que le ofrecemos</h2>
+                <p class="text-muted mb-0">Soluciones de ahorro y crédito para que su dinero trabaje para usted.</p>
             </div>
 
             <div class="row g-4">
-                <div class="col-lg-4 col-md-6">
-                    <div class="service-card card h-100 border-0 shadow-sm">
-                        <div class="card-body text-center p-4">
-                            <div class="service-icon mb-4">
-                                <i class="bi bi-shield-check"></i>
+                <!-- Ahorros -->
+                <article class="col-md-6 col-lg-3">
+                    <div class="card h-100 shadow-sm border-0 feature-card">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <h3 class="h5 mb-0">Cuenta de Ahorros</h3>
+                                <i class="bi bi-piggy-bank-fill text-primary fs-3" aria-hidden="true"></i>
                             </div>
-                            <h4 class="card-title mb-3">Máxima Seguridad</h4>
-                            <p class="card-text text-muted">
-                                Tu información financiera está protegida con cifrado de extremo a extremo
-                                y autenticación de múltiples factores.
-                            </p>
-                            <div class="service-features">
-                                <small class="badge bg-primary bg-opacity-10 text-primary me-2">SSL 256-bit</small>
-                                <small class="badge bg-primary bg-opacity-10 text-primary">2FA</small>
-                            </div>
+                            <p class="small text-muted">Guarde su dinero de forma segura. Acceso rápido y sin
+                                comisiones.</p>
+                            <ul class="small text-muted list-unstyled mb-3">
+                                <li><i class="bi bi-check2 text-success me-1"></i> Sin costo de apertura</li>
+                                <li><i class="bi bi-check2 text-success me-1"></i> Movimientos en línea</li>
+                            </ul>
+                            <a href="{% url 'users:login' %}" class="btn btn-outline-primary w-100">Consultar</a>
                         </div>
                     </div>
-                </div>
+                </article>
 
-                <div class="col-lg-4 col-md-6">
-                    <div class="service-card card h-100 border-0 shadow-sm">
-                        <div class="card-body text-center p-4">
-                            <div class="service-icon mb-4">
-                                <i class="bi bi-lightning-charge"></i>
+                <!-- Créditos -->
+                <article class="col-md-6 col-lg-3">
+                    <div class="card h-100 shadow-sm border-0 feature-card">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <h3 class="h5 mb-0">Créditos</h3>
+                                <i class="bi bi-cash-coin text-primary fs-3" aria-hidden="true"></i>
                             </div>
-                            <h4 class="card-title mb-3">Ultra Rápido</h4>
-                            <p class="card-text text-muted">
-                                Consulta tus saldos y movimientos en tiempo real.
-                                Todas tus operaciones se procesan instantáneamente.
-                            </p>
-                            <div class="service-features">
-                                <small class="badge bg-success bg-opacity-10 text-success me-2">Tiempo real</small>
-                                <small class="badge bg-success bg-opacity-10 text-success">24/7</small>
-                            </div>
+                            <p class="small text-muted">Préstamos flexibles para sus proyectos o cualquier
+                                emergencia.</p>
+                            <ul class="small text-muted list-unstyled mb-3">
+                                <li><i class="bi bi-check2 text-success me-1"></i> Cuotas fijas a su medida</li>
+                                <li><i class="bi bi-check2 text-success me-1"></i> Proceso rápido y sin tanto trámite
+                                </li>
+                            </ul>
+                            <a href="{% url 'users:login' %}" class="btn btn-outline-primary w-100">Simular /
+                                Solicitar</a>
                         </div>
                     </div>
-                </div>
+                </article>
 
-                <div class="col-lg-4 col-md-6">
-                    <div class="service-card card h-100 border-0 shadow-sm">
-                        <div class="card-body text-center p-4">
-                            <div class="service-icon mb-4">
-                                <i class="bi bi-globe"></i>
+                <!-- Plazo Fijo -->
+                <article class="col-md-6 col-lg-3">
+                    <div class="card h-100 shadow-sm border-0 feature-card">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <h3 class="h5 mb-0">Plazo Fijo</h3>
+                                <i class="bi bi-calendar-check-fill text-primary fs-3" aria-hidden="true"></i>
                             </div>
-                            <h4 class="card-title mb-3">Siempre Disponible</h4>
-                            <p class="card-text text-muted">
-                                Accede desde cualquier dispositivo, en cualquier lugar del mundo.
-                                Tu cooperativa siempre contigo.
-                            </p>
-                            <div class="service-features">
-                                <small class="badge bg-info bg-opacity-10 text-info me-2">Multi-dispositivo</small>
-                                <small class="badge bg-info bg-opacity-10 text-info">Global</small>
-                            </div>
+                            <p class="small text-muted">Gane más intereses si deja su dinero por un tiempo.</p>
+                            <ul class="small text-muted list-unstyled mb-3">
+                                <li><i class="bi bi-check2 text-success me-1"></i> Plazos flexibles</li>
+                                <li><i class="bi bi-check2 text-success me-1"></i> Tasas competitivas</li>
+                            </ul>
+                            <a href="{% url 'users:login' %}" class="btn btn-outline-primary w-100">Calcular
+                                rendimiento</a>
                         </div>
                     </div>
-                </div>
+                </article>
 
-                <div class="col-lg-4 col-md-6">
-                    <div class="service-card card h-100 border-0 shadow-sm">
-                        <div class="card-body text-center p-4">
-                            <div class="service-icon mb-4">
-                                <i class="bi bi-graph-up-arrow"></i>
+                <!-- Aportación -->
+                <article class="col-md-6 col-lg-3">
+                    <div class="card h-100 shadow-sm border-0 feature-card">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <h3 class="h5 mb-0">Certificados de Aportación</h3>
+                                <i class="bi bi-award-fill text-primary fs-3" aria-hidden="true"></i>
                             </div>
-                            <h4 class="card-title mb-3">Analíticas Avanzadas</h4>
-                            <p class="card-text text-muted">
-                                Visualiza tus patrones de gasto, establece metas de ahorro
-                                y toma decisiones financieras inteligentes.
-                            </p>
+                            <p class="small text-muted">Hágase socio de la caja y reciba beneficios.</p>
+                            <ul class="small text-muted list-unstyled mb-3">
+                                <li><i class="bi bi-check2 text-success me-1"></i> Derecho a voto</li>
+                                <li><i class="bi bi-check2 text-success me-1"></i> Ganancias anuales</li>
+                            </ul>
+                            <a href="{% url 'users:login' %}" class="btn btn-outline-primary w-100">Ver detalle</a>
                         </div>
                     </div>
-                </div>
-
-                <div class="col-lg-4 col-md-6">
-                    <div class="service-card card h-100 border-0 shadow-sm">
-                        <div class="card-body text-center p-4">
-                            <div class="service-icon mb-4">
-                                <i class="bi bi-headset"></i>
-                            </div>
-                            <h4 class="card-title mb-3">Soporte Experto</h4>
-                            <p class="card-text text-muted">
-                                Nuestro equipo de especialistas está disponible para ayudarte
-                                cuando lo necesites.
-                            </p>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="col-lg-4 col-md-6">
-                    <div class="service-card card h-100 border-0 shadow-sm">
-                        <div class="card-body text-center p-4">
-                            <div class="service-icon mb-4">
-                                <i class="bi bi-bell"></i>
-                            </div>
-                            <h4 class="card-title mb-3">Notificaciones Smart</h4>
-                            <p class="card-text text-muted">
-                                Recibe alertas personalizadas sobre tus cuentas,
-                                pagos y oportunidades de ahorro.
-                            </p>
-                        </div>
-                    </div>
-                </div>
+                </article>
             </div>
         </div>
     </section>
 
-    <!-- CTA Section -->
-    <section class="cta-section py-5">
+    <!-- ========== SERVICIOS ========== -->
+    <section id="servicios" class="py-6 bg-light">
         <div class="container">
-            <div class="row align-items-center">
-                <div class="col-lg-8">
-                    <h3 class="fw-bold mb-2 text-white">¿Listo para comenzar tu experiencia digital?</h3>
-                    <p class="text-light mb-0">
-                        Únete a miles de miembros que ya disfrutan de la comodidad de {{ company.company_name }}
-                    </p>
+            <div class="text-center mb-5">
+                <h2 class="display-6 fw-bold mb-1">Nuestros servicios</h2>
+                <p class="text-muted mb-0">Atención, educación financiera, canales y avisos.</p>
+            </div>
+
+            <div class="row g-4">
+                <div class="col-md-6 col-lg-3">
+                    <div class="p-4 bg-white shadow-sm h-100 rounded-4">
+                        <i class="bi bi-headset fs-2 d-block mb-2 text-primary" aria-hidden="true"></i>
+                        <h3 class="h5">Atención y soporte</h3>
+                        <p class="small text-muted mb-0">Respuesta rápida por ventanilla y por medios digitales.</p>
+                    </div>
                 </div>
-                <div class="col-lg-4 text-lg-end">
-                    <a href="#" class="btn btn-light btn-lg rounded-pill px-4 py-3">
-                        <i class="bi bi-rocket-takeoff me-2"></i>
-                        Comenzar Ahora
-                    </a>
+                <div class="col-md-6 col-lg-3">
+                    <div class="p-4 bg-white shadow-sm h-100 rounded-4">
+                        <i class="bi bi-mortarboard fs-2 d-block mb-2 text-primary" aria-hidden="true"></i>
+                        <h3 class="h5">Educación financiera</h3>
+                        <p class="small text-muted mb-0">Charlas y consejos para su ahorro y crédito.</p>
+                    </div>
+                </div>
+                <div class="col-md-6 col-lg-3">
+                    <div class="p-4 bg-white shadow-sm h-100 rounded-4">
+                        <i class="bi bi-bell fs-2 d-block mb-2 text-primary" aria-hidden="true"></i>
+                        <h3 class="h5">Avisos</h3>
+                        <p class="small text-muted mb-0">Alertas de movimientos y vencimientos.</p>
+                    </div>
+                </div>
+                <div class="col-md-6 col-lg-3">
+                    <div class="p-4 bg-white shadow-sm h-100 rounded-4">
+                        <i class="bi bi-phone fs-2 d-block mb-2 text-primary" aria-hidden="true"></i>
+                        <h3 class="h5">Canales digitales</h3>
+                        <p class="small text-muted mb-0">Portal web con ingreso seguro.</p>
+                    </div>
                 </div>
             </div>
         </div>
     </section>
 
+    <!-- ========== GOBIERNO (con skeleton) ========== -->
+    <section id="gobernanza" class="py-6">
+        <div class="container">
+            <div class="text-center mb-5">
+                <h2 class="display-6 fw-bold mb-1">Gobierno</h2>
+                <p class="text-muted mb-0">Estructura, transparencia y control.</p>
+            </div>
+
+            <div class="row g-4">
+                <div class="col-lg-4">
+                    <div class="card border-0 shadow-sm h-100">
+                        <div class="card-body">
+                            <h3 class="h5"><i class="bi bi-diagram-3 me-2 text-primary"></i>Órganos</h3>
+                            <ul class="small text-muted mb-0">
+                                <li>Asamblea de socios</li>
+                                <li>Consejo de Administración</li>
+                                <li>Consejo de Vigilancia</li>
+                                <li>Gerencia General</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-4">
+                    <div class="card border-0 shadow-sm h-100">
+                        <div class="card-body">
+                            <h3 class="h5"><i class="bi bi-people me-2 text-primary"></i>Ética</h3>
+                            <p class="small text-muted mb-2">Políticas internas, manejo de riesgos y controles.</p>
+                            <span class="badge text-bg-secondary me-2 mb-2"><i class="bi bi-patch-check-fill me-1"></i>SEPS</span>
+                            <span class="badge text-bg-secondary me-2 mb-2"><i class="bi bi-shield-lock-fill me-1"></i>Datos</span>
+                            <span class="badge text-bg-secondary mb-2"><i class="bi bi-clipboard-check me-1"></i>Auditoría</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ========== ALIANZAS ========== -->
+    <section id="alianzas" class="py-6 bg-light">
+        <div class="container">
+            <div class="text-center mb-5">
+                <h2 class="display-6 fw-bold mb-1">Alianzas</h2>
+                <p class="text-muted mb-0">Trabajamos con quienes comparten nuestra misión.</p>
+            </div>
+
+            <div class="row g-4 align-items-center">
+                {% for i in "1234" %}
+                    <div class="col-6 col-md-3">
+                        <div class="p-4 bg-white shadow-sm rounded-4 text-center">
+                            <i class="bi bi-building fs-1 text-primary d-block mb-2" aria-hidden="true"></i>
+                            <span class="small text-muted d-block">Aliado {{ forloop.counter }}</span>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    </section>
+
+    <!-- ========== PREGUNTAS ========== -->
+    <section id="faq" class="py-6">
+        <div class="container">
+            <h2 class="fw-bold text-center mb-4">Preguntas frecuentes</h2>
+            <div class="row justify-content-center">
+                <div class="col-lg-8">
+                    <div class="accordion" id="faqAcc">
+                        <div class="accordion-item">
+                            <h3 class="accordion-header" id="q1">
+                                <button class="accordion-button" type="button" data-bs-toggle="collapse"
+                                        data-bs-target="#a1" aria-expanded="true" aria-controls="a1">
+                                    ¿Cómo ingreso a mi cuenta?
+                                </button>
+                            </h3>
+                            <div id="a1" class="accordion-collapse collapse show" data-bs-parent="#faqAcc"
+                                 aria-labelledby="q1">
+                                <div class="accordion-body">
+                                    Presione <a href="{% url 'users:login' %}">Ingresar a mi cuenta</a> y use sus datos.
+                                    Si olvidó la contraseña, recupérela allí mismo.
+                                </div>
+                            </div>
+                        </div>
+                        <div class="accordion-item">
+                            <h3 class="accordion-header" id="q2">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                                        data-bs-target="#a2" aria-expanded="false" aria-controls="a2">
+                                    ¿Qué necesito para abrir una cuenta de ahorros?
+                                </button>
+                            </h3>
+                            <div id="a2" class="accordion-collapse collapse" data-bs-parent="#faqAcc"
+                                 aria-labelledby="q2">
+                                <div class="accordion-body">
+                                    Documento de identidad, datos de contacto y requisitos
+                                    de {% firstof company.company_name "Entidad" %}.
+                                </div>
+                            </div>
+                        </div>
+                        <div class="accordion-item">
+                            <h3 class="accordion-header" id="q3">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                                        data-bs-target="#a3" aria-expanded="false" aria-controls="a3">
+                                    ¿Cómo simulo un crédito?
+                                </button>
+                            </h3>
+                            <div id="a3" class="accordion-collapse collapse" data-bs-parent="#faqAcc"
+                                 aria-labelledby="q3">
+                                <div class="accordion-body">
+                                    Ingrese a su cuenta y use el simulador del panel. Verá cuotas fijas y variables.
+                                </div>
+                            </div>
+                        </div>
+                    </div><!-- /accordion -->
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ========== CONTACTO (correo + WhatsApp) ========== -->
+    <section id="contacto" class="py-6 bg-light">
+        <div class="container">
+            <div class="text-center mb-5">
+                <h2 class="display-6 fw-bold mb-1">Estamos para ayudarle</h2>
+                <p class="text-muted mb-0">No dude en contactarnos, le esperamos con gusto.</p>
+            </div>
+
+            <div class="row g-4 justify-content-center">
+                <div class="col-lg-4">
+                    <div class="card h-100 shadow-sm border-0 text-center p-4">
+                        <i class="bi bi-geo-alt d-block fs-1 text-primary mb-3" aria-hidden="true"></i>
+                        <h3 class="h5">Visítenos</h3>
+                        <p class="text-muted mb-1 small">{% firstof company.address "Loja, Ecuador" %}</p>
+                        <p class="text-muted small mb-0">Horario: Lun a Vie, 9am - 5pm</p>
+                    </div>
+                </div>
+                <div class="col-lg-4">
+                    <div class="card h-100 shadow-sm border-0 text-center p-4">
+                        <i class="bi bi-envelope-fill d-block fs-1 text-primary mb-3" aria-hidden="true"></i>
+                        <h3 class="h5">Escríbanos</h3>
+                        <p class="text-muted mb-1 small">{% firstof company.email "info@tucaja.com" %}</p>
+                        <a class="btn btn-outline-primary mt-2"
+                           href="mailto:{% firstof company.email 'info@tucaja.com' %}">
+                            Enviar un correo
+                        </a>
+                    </div>
+                </div>
+                <div class="col-lg-4">
+                    <div class="card h-100 shadow-sm border-0 text-center p-4">
+                        <i class="bi bi-whatsapp d-block fs-1 text-success mb-3" aria-hidden="true"></i>
+                        <h3 class="h5">Chat WhatsApp</h3>
+                        <p class="text-muted mb-1 small">{% firstof company.phone '000-000-0000' %}</p>
+                        <a class="btn btn-success mt-2" href="https://wa.me/{{ company.phone|default:'0000000000' }}"
+                           target="_blank" rel="noopener">
+                            Iniciar chat
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Estilos (solo los que se usan) -->
     <style>
-        /* Hero Section */
+        .py-6 {
+            padding-top: 4.5rem;
+            padding-bottom: 4.5rem;
+        }
+
         .hero-section {
-            background: linear-gradient(135deg, #0d6efd 0%, #6610f2 50%, #6f42c1 100%);
-            min-height: 100vh;
+            min-height: 65vh;
             display: flex;
             align-items: center;
-        }
-
-        .hero-background {
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32' width='32' height='32' fill='none' stroke='%23ffffff'%3e%3cpath d='m0 .5 32 32M32 .5 0 32'/%3e%3c/svg%3e") repeat;
-            opacity: 0.05;
-            animation: float 20s infinite linear;
-        }
-
-        .hero-overlay {
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0, 0, 0, 0.1);
-        }
-
-        .hero-badge {
-            display: inline-flex;
-            align-items: center;
-            background: rgba(255, 255, 255, 0.2);
-            backdrop-filter: blur(10px);
-            border-radius: 50px;
-            padding: 0.5rem 1.5rem;
-            font-size: 0.9rem;
-            font-weight: 500;
-            border: 1px solid rgba(255, 255, 255, 0.3);
-        }
-
-        .text-gradient {
-            background: linear-gradient(45deg, #fff, #e3f2fd);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-
-        .hero-title {
-            font-size: 3.5rem;
-            line-height: 1.1;
-        }
-
-        .hero-subtitle {
-            font-size: 1.25rem;
-            opacity: 0.9;
-            max-width: 500px;
-        }
-
-        /* Floating Elements */
-        .floating-card {
-            animation: float 6s ease-in-out infinite;
-            margin-bottom: 2rem;
-        }
-
-        .floating-icons {
+            background: radial-gradient(1200px 600px at 10% 0%, rgba(255, 233, 182, .7), transparent 60%),
+            linear-gradient(135deg, #000 0%, #1a1a1a 35%, #2a2a2a 100%),
+            linear-gradient(45deg, #f3c66b, #d9a840, #a8781e);
+            background-blend-mode: overlay, normal, multiply;
             position: relative;
-            height: 200px;
         }
 
-        .floating-icon {
-            position: absolute;
-            width: 60px;
-            height: 60px;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            color: white;
-            font-size: 1.5rem;
-        }
-
-        .icon-1 {
-            top: 20px;
-            right: 20px;
-            animation: float 4s ease-in-out infinite;
-        }
-
-        .icon-2 {
-            top: 100px;
-            left: 20px;
-            animation: float 5s ease-in-out infinite reverse;
-        }
-
-        .icon-3 {
-            bottom: 20px;
-            right: 60px;
-            animation: float 6s ease-in-out infinite;
-        }
-
-        /* Service Cards */
-        .service-card {
-            transition: all 0.3s ease;
+        .feature-card {
             border-radius: 1rem;
         }
 
-        .service-card:hover {
-            transform: translateY(-10px);
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1) !important;
-        }
-
-        .service-icon {
-            width: 80px;
-            height: 80px;
-            background: linear-gradient(135deg, #0d6efd, #6610f2);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 0 auto;
-            font-size: 2rem;
-            color: white;
-        }
-
-        .service-features {
-            margin-top: 1rem;
-        }
-
-        /* CTA Section */
-        .cta-section {
-            background: linear-gradient(135deg, #6610f2 0%, #6f42c1 100%);
-        }
-
-        /* Scroll Indicator */
-        .scroll-indicator {
-            position: absolute;
-            bottom: 2rem;
-            left: 50%;
-            transform: translateX(-50%);
-            color: white;
-        }
-
-        .scroll-arrow {
-            width: 2px;
-            height: 30px;
-            background: white;
-            margin: 0 auto;
-            opacity: 0.7;
-            animation: bounce 2s infinite;
-        }
-
-        .scroll-arrow::after {
-            content: '';
-            position: absolute;
-            bottom: -5px;
-            left: -3px;
-            width: 8px;
-            height: 8px;
-            border-right: 2px solid white;
-            border-bottom: 2px solid white;
-            transform: rotate(45deg);
-        }
-
-        /* Animations */
-        @keyframes float {
-            0%, 100% {
-                transform: translateY(0px);
-            }
-            50% {
-                transform: translateY(-20px);
-            }
-        }
-
-        @keyframes bounce {
-            0%, 20%, 50%, 80%, 100% {
-                transform: translateY(0);
-            }
-            40% {
-                transform: translateY(-10px);
-            }
-            60% {
-                transform: translateY(-5px);
-            }
-        }
-
-        /* Responsive Design */
-        @media (max-width: 768px) {
-            .hero-title {
-                font-size: 2.5rem;
-            }
-
-            .hero-subtitle {
-                font-size: 1.1rem;
-            }
-
-            .hero-actions .btn {
-                display: block;
-                width: 100%;
-                margin-bottom: 1rem;
-            }
-
-            .floating-icons {
-                display: none;
-            }
-
-            .service-icon {
-                width: 60px;
-                height: 60px;
-                font-size: 1.5rem;
-            }
-        }
-
-        @media (min-width: 1400px) {
-            .hero-title {
-                font-size: 4rem;
-            }
-
-            .hero-subtitle {
-                font-size: 1.4rem;
-            }
+        .object-fit-cover {
+            object-fit: cover;
         }
     </style>
+
 {% endblock %}

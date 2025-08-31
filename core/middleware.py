@@ -8,11 +8,6 @@ class SubdomainDetectionMiddleware:
     """
     Middleware que detecta el subdominio y asigna la configuración
     de empresa correspondiente al request.
-
-    Aplica principios SOLID:
-    - Single Responsibility: Solo se encarga de detectar subdominios
-    - Open/Closed: Extensible sin modificar código existente
-    - Dependency Inversion: Depende de abstracciones (cache, modelo)
     """
 
     def __init__(self, get_response):

@@ -8,11 +8,6 @@ def company_context(request):
     Context processor que añade información de la empresa al contexto
     de todos los templates.
 
-    Principios aplicados:
-    - KISS: Simple y directo
-    - DRY: Evita repetir código en cada vista
-    - Single Responsibility: Solo se encarga del contexto de empresa
-
     Args:
         request: HttpRequest con subdomain y company_config añadidos por middleware
 
@@ -21,20 +16,7 @@ def company_context(request):
     """
 
     # Configuración por defecto (dominio principal)
-    default_config = {
-        'company_name': getattr(settings, 'DEFAULT_COMPANY_NAME', 'REFSE'),
-        'short_name': getattr(settings, 'DEFAULT_SHORT_NAME', 'REFSE'),
-        'site_title': getattr(settings, 'DEFAULT_SITE_TITLE', 'Sistema REFSE'),
-        'email': getattr(settings, 'DEFAULT_EMAIL', None),
-        'phone': getattr(settings, 'DEFAULT_PHONE', None),
-        'address': getattr(settings, 'DEFAULT_ADDRESS', None),
-        'website': getattr(settings, 'DEFAULT_WEBSITE', None),
-        'logo_url': getattr(settings, 'DEFAULT_LOGO_URL', None),
-        'primary_color': getattr(settings, 'DEFAULT_PRIMARY_COLOR', '#007bff'),
-        'secondary_color': getattr(settings, 'DEFAULT_SECONDARY_COLOR', '#6c757d'),
-        'welcome_message': getattr(settings, 'DEFAULT_WELCOME_MESSAGE', None),
-        'footer_text': getattr(settings, 'DEFAULT_FOOTER_TEXT', None),
-    }
+    default_config = {}
 
     # Si hay configuración de empresa específica, usarla
     company_config = getattr(request, 'company_config', None)

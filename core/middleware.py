@@ -32,26 +32,20 @@ class SubdomainDetectionMiddleware:
         return response
 
     def _extract_subdomain(self, host):
-        """
-        Extrae el subdominio del host.
-
-        Args:
-            host (str): Host completo (ej: cajacomunalsantiago.refse.org)
-
-        Returns:
-            str: Subdominio o None si es el dominio principal
-        """
         if not host:
             return None
-
-        # Remover puerto si existe
         host = host.split(':')[0]
-
-        # Separar por puntos
         parts = host.split('.')
 
-        # Si hay 3 o más partes, el primero es el subdominio
-        # Ej: cajacomunalsantiago.refse.org -> ['cajacomunalsantiago', 'refse', 'org']
+        # dev: caja.localhost -> 'caja'
+        if len(parts) == 2 and parts[1] in ("localhost",):
+            return parts[0].lower()
+
+        # dev helpers: lvh.me / nip.io (caja.lvh.me, caja.127.0.0.1.nip.io)
+        if host.endswith("lvh.me") or host.endswith("nip.io"):
+            return parts[0].lower()
+
+        # prod: 3+ partes
         if len(parts) >= 3:
             return parts[0].lower()
 

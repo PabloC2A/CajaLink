@@ -1,26 +1,22 @@
 # core/context_processors.py
 
-from django.conf import settings
-
-
 def company_context(request):
-    """
-    Context processor que añade información de la empresa al contexto
-    de todos los templates.
+    default_config = {
+        'company_name': "Entidad",
+        'short_name': "Entidad",
+        'site_title': "Portal",
+        'email': "info@tucaja.com",
+        'phone': "0000000000",
+        'address': "Loja, Ecuador",
+        'website': "",
+        'logo_url': None,
+        'primary_color': "#007bff",
+        'secondary_color': "#6c757d",
+        'welcome_message': "",
+        'footer_text': "Estamos para servirle.",
+    }
 
-    Args:
-        request: HttpRequest con subdomain y company_config añadidos por middleware
-
-    Returns:
-        dict: Contexto con información de la empresa
-    """
-
-    # Configuración por defecto (dominio principal)
-    default_config = {}
-
-    # Si hay configuración de empresa específica, usarla
     company_config = getattr(request, 'company_config', None)
-
     if company_config:
         config_data = {
             'company_name': company_config.company_name,

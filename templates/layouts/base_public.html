@@ -31,7 +31,6 @@
                     <li class="nav-item"><a class="nav-link" href="#contacto">Contacto</a></li>
 
                     <li class="nav-item ms-lg-3">
-                        <!-- NO TOCAR: ruta real de login -->
                         <a href="{% url 'users:login' %}" class="btn btn-warning text-dark fw-bold">
                             <i class="bi bi-person-lock me-1" aria-hidden="true"></i>
                             Banca Web
@@ -64,7 +63,7 @@
                     </div>
                     <p class="text-white-50 small mb-2">{% firstof company.footer_text "Estamos para servirle." %}</p>
                     <div class="small text-white-50">
-                        <i class="bi bi-geo-alt me-1"></i> {% firstof company.address "Loja, Ecuador" %}<br>
+                        <i class="bi bi-geo-alt me-1"></i> {% firstof company.address "-" %}<br>
                         <i class="bi bi-telephone me-1"></i> {% firstof company.phone "-" %} ·
                         <i class="bi bi-envelope ms-2 me-1"></i> {% firstof company.email "-" %}
                     </div>

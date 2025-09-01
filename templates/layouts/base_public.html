@@ -6,7 +6,7 @@
         <div class="container">
             <a class="navbar-brand d-flex align-items-center gap-2" href="{% url 'homepage' %}">
                 {% if company and company.logo_url %}
-                    <img src="{{ company.logo_url }}" alt="Logo {% firstof company.company_name 'Entidad' %}"
+                    <img src="{{ company.logo_url }}" alt="Logo"
                          width="36" height="36" class="rounded-circle object-fit-cover">
                 {% else %}
                     <i class="bi bi-bank2 fs-3 text-warning" aria-hidden="true"></i>
@@ -53,7 +53,7 @@
                 <div class="col-md-5">
                     <div class="d-flex align-items-center gap-2 mb-2">
                         {% if company and company.logo_url %}
-                            <img src="{{ company.logo_url }}" alt="Logo {% firstof company.company_name 'Entidad' %}"
+                            <img src="{{ company.logo_url }}" alt="Logo"
                                  width="32" height="32" class="rounded-circle object-fit-cover">
                         {% else %}
                             <i class="bi bi-building fs-4 text-light" aria-hidden="true"></i>

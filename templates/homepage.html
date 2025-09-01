@@ -10,7 +10,7 @@
                     <header class="text-white">
                         <div class="d-inline-flex align-items-center gap-2 px-3 py-2 rounded-pill bg-white bg-opacity-10 border border-white border-opacity-25 mb-3">
                             {% if company and company.logo_url %}
-                                <img src="{{ company.logo_url  }}"
+                                <img src="{{ company.logo_url }}"
                                      alt="Logo"
                                      width="28" height="28" class="rounded-circle object-fit-cover">
                             {% else %}
@@ -28,7 +28,6 @@
                         </p>
 
                         <div class="d-flex flex-wrap gap-3">
-                            <!-- NO TOCAR -->
                             <a href="{% url 'users:login' %}"
                                class="btn btn-warning btn-lg rounded-pill px-4 text-dark fw-bold shadow-sm">
                                 <i class="bi bi-person-lock me-2"></i>Ingresar a Banca Web

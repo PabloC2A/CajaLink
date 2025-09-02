@@ -116,7 +116,7 @@
                                 <h3 class="h5 mb-0">Certificados de Aportación</h3>
                                 <i class="bi bi-award-fill text-primary fs-3" aria-hidden="true"></i>
                             </div>
-                            <p class="small text-muted">Hágase socio de la caja y reciba beneficios.</p>
+                            <p class="small text-muted">Hágase socio de la caja y sus reciba beneficios.</p>
                             <ul class="small text-muted list-unstyled mb-3">
                                 <li><i class="bi bi-check2 text-success me-1"></i> Derecho a voto</li>
                                 <li><i class="bi bi-check2 text-success me-1"></i> Ganancias anuales</li>
@@ -173,8 +173,8 @@
                 <h2 class="display-6 fw-bold mb-1">Gobierno</h2>
                 <p class="text-muted mb-0">Estructura, transparencia y control.</p>
             </div>
-            <div class="row g-4">
-                <div class="col-lg-4">
+            <div class="row g-4 justify-content-center">
+                <div class="col-md-6">
                     <div class="card border-0 shadow-sm h-100">
                         <div class="card-body">
                             <h3 class="h5"><i class="bi bi-diagram-3 me-2 text-primary"></i>Órganos</h3>
@@ -187,7 +187,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="col-lg-4">
+                <div class="col-md-6">
                     <div class="card border-0 shadow-sm h-100">
                         <div class="card-body">
                             <h3 class="h5"><i class="bi bi-people me-2 text-primary"></i>Ética</h3>
@@ -208,15 +208,21 @@
                 <p class="text-muted mb-0">Trabajamos con quienes comparten nuestra misión.</p>
             </div>
 
-            <div class="row g-4 align-items-center">
-                {% for i in "1234" %}
-                    <div class="col-6 col-md-3">
-                        <div class="p-4 bg-white shadow-sm rounded-4 text-center">
-                            <i class="bi bi-building fs-1 text-primary d-block mb-2" aria-hidden="true"></i>
-                            <span class="small text-muted d-block">Aliado {{ forloop.counter }}</span>
-                        </div>
+            <div class="row g-4 justify-content-center align-items-center">
+                <div class="col-6 col-md-3">
+                    <div class="p-4 bg-white shadow-sm rounded-4 text-center">
+                        <img src="{% static 'img/logo_refse.jpeg' %}" alt="Logo de Refse" class="img-fluid"
+                             style="height: 60px;">
+                        <span class="small text-muted d-block mt-2">REFSE</span>
                     </div>
-                {% endfor %}
+                </div>
+                <div class="col-6 col-md-3">
+                    <div class="p-4 bg-white shadow-sm rounded-4 text-center">
+                        <img src="{% static 'img/logo_byteandino.png' %}" alt="Logo de Byeandino" class="img-fluid"
+                             style="height: 60px;">
+                        <span class="small text-muted d-block mt-2">Byeandino</span>
+                    </div>
+                </div>
             </div>
         </div>
     </section>

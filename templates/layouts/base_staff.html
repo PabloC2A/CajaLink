@@ -1,41 +1,54 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="d-flex min-vh-100">
+    <div class="d-flex min-vh-100">
+        <!-- Botón hamburguesa para móviles -->
+        <button class="btn btn-dark position-fixed d-lg-none shadow"
+                type="button"
+                data-bs-toggle="offcanvas"
+                data-bs-target="#sidebarMenu"
+                style="top: 1rem; left: 1rem; z-index: 1040;">
+            <i class="bi bi-list fs-5"></i>
+        </button>
 
-    <button class="btn btn-dark position-fixed d-lg-none shadow" type="button" data-bs-toggle="offcanvas"
-        data-bs-target="#sidebarMenu" aria-controls="sidebarMenu" aria-label="Abrir menú"
-        style="top:1rem; left:1rem; z-index:1050;">
-        <i class="bi bi-list fs-5"></i>
-    </button>
+        <!-- Sidebar -->
+        <div class="offcanvas-lg offcanvas-start d-flex flex-column flex-shrink-0 p-3 text-bg-dark"
+             tabindex="-1"
+             id="sidebarMenu"
+             style="width: 280px; min-height: 100vh;">
 
-    <div id="sidebarMenu" class="offcanvas offcanvas-start offcanvas-lg text-bg-dark p-3 d-flex flex-column"
-        tabindex="-1" aria-labelledby="sidebarLabel" style="--bs-offcanvas-width: 280px;">
-
-        <div class="offcanvas-header d-lg-none">
-            <h5 class="offcanvas-title" id="sidebarLabel">{{ company.company_name }}</h5>
-            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas"
-                aria-label="Cerrar"></button>
-        </div>
-
-        <div class="offcanvas-body d-flex flex-column p-0">
+            <!-- Header del sidebar -->
             <a href="{% url 'staffpanel:dashboard' %}"
-                class="d-none d-lg-flex align-items-center mb-3 text-white text-decoration-none">
+               class="d-flex align-items-center mb-3 mb-md-0 me-md-auto text-white text-decoration-none">
                 <div class="bg-primary rounded d-flex align-items-center justify-content-center me-2"
-                    style="width:32px; height:32px;">
+                     style="width: 32px; height: 32px;">
                     <i class="bi bi-building text-white"></i>
                 </div>
                 <span class="fs-4">{{ company.company_name }}</span>
             </a>
 
-            <hr class="d-none d-lg-block">
+            <!-- Botón de cierre para móviles -->
+            <button type="button"
+                    class="btn-close btn-close-white position-absolute"
+                    data-bs-dismiss="offcanvas"
+                    data-bs-target="#sidebarMenu"
+                    aria-label="Close"
+                    style="top: 1rem; right: 1rem; display: none;">
+            </button>
 
+            <hr>
+
+            <!-- Navegación principal con mb-auto -->
             <ul class="nav nav-pills flex-column mb-auto">
                 <li class="nav-item">
                     <a href="{% url 'staffpanel:dashboard' %}"
-                        class="nav-link d-flex align-items-center {% if request.resolver_match.app_name == 'staffpanel' and request.resolver_match.url_name == 'dashboard' %}active{% else %}text-white nav-link-hover{% endif %}"
-                        {% if request.resolver_match.app_name=='staffpanel' and
-                        request.resolver_match.url_name=='dashboard' %}aria-current="page" {% endif %}>
+                       class="nav-link d-flex align-items-center
+                              {% if request.resolver_match.app_name == 'staffpanel' and request.resolver_match.url_name == 'dashboard' %}
+                                  active
+                              {% else %}
+                                  text-white nav-link-hover
+                              {% endif %}"
+                       {% if request.resolver_match.app_name == 'staffpanel' and request.resolver_match.url_name == 'dashboard' %}aria-current="page"{% endif %}>
                         <i class="bi bi-house-door pe-none me-2"></i>
                         Dashboard
                     </a>
@@ -43,9 +56,13 @@
 
                 <li>
                     <a href="{% url 'staffpanel:user_list' %}"
-                        class="nav-link d-flex align-items-center {% if request.resolver_match.app_name == 'staffpanel' and 'user' in request.resolver_match.url_name %}active{% else %}text-white nav-link-hover{% endif %}"
-                        {% if request.resolver_match.app_name=='staffpanel' and 'user' in
-                        request.resolver_match.url_name %}aria-current="page" {% endif %}>
+                       class="nav-link d-flex align-items-center
+                              {% if request.resolver_match.app_name == 'staffpanel' and 'user' in request.resolver_match.url_name %}
+                                  active
+                              {% else %}
+                                  text-white nav-link-hover
+                              {% endif %}"
+                       {% if request.resolver_match.app_name == 'staffpanel' and 'user' in request.resolver_match.url_name %}aria-current="page"{% endif %}>
                         <i class="bi bi-people pe-none me-2"></i>
                         Usuarios
                     </a>
@@ -54,11 +71,12 @@
 
             <hr>
 
-            <div class="dropdown mt-auto">
+            <!-- Usuario con dropdown -->
+            <div class="dropdown">
                 <a href="#" class="d-flex align-items-center text-white text-decoration-none dropdown-toggle"
-                    data-bs-toggle="dropdown" aria-expanded="false">
+                   data-bs-toggle="dropdown" aria-expanded="false">
                     <div class="bg-secondary rounded-circle d-flex align-items-center justify-content-center me-2"
-                        style="width:32px; height:32px;">
+                         style="width: 32px; height: 32px;">
                         <i class="bi bi-person-fill text-white"></i>
                     </div>
                     <strong>{{ user.get_full_name|default:"Cristhian Martinez" }}</strong>
@@ -78,52 +96,86 @@
                 </ul>
             </div>
         </div>
+
+        <!-- Contenido principal -->
+        <div class="flex-grow-1 d-flex flex-column bg-light">
+            <!-- Espaciador para el botón hamburguesa en móviles -->
+            <div class="d-lg-none" style="height: 4rem;"></div>
+
+            <main class="flex-grow-1 p-4">
+                <div class="container-fluid">
+                    {% block main_content %}{% endblock %}
+                </div>
+            </main>
+        </div>
     </div>
 
-    <div class="flex-grow-1 d-flex flex-column bg-light">
-        <div class="d-lg-none" style="height:4rem;"></div>
+    <style>
+        /* Hover effects para navegación */
+        .nav-link-hover:hover {
+            background-color: rgba(255, 255, 255, 0.1) !important;
+            transition: background-color 0.15s ease-in-out;
+        }
 
-        <main class="flex-grow-1 p-4">
-            <div class="container-fluid">
-                {% block main_content %}{% endblock %}
-            </div>
-        </main>
-    </div>
-</div>
-
-<style>
-    .btn-raise:hover {
-        transform: translateY(-1px);
-        transition: transform .15s ease-in-out;
-    }
-
-    .nav-link-hover:hover {
-        background-color: rgba(255, 255, 255, .1) !important;
-        transition: background-color .15s;
-    }
-
-    @media (min-width: 992px) {
-        #sidebarMenu {
+        /* Asegurar que el sidebar ocupe toda la altura */
+        .offcanvas-lg {
             height: 100vh;
         }
-    }
 
-    .offcanvas-body {
-        scrollbar-width: thin;
-        scrollbar-color: rgba(255, 255, 255, .3) transparent;
-    }
+        /* Estilos específicos para diferentes tamaños de pantalla */
+        @media (min-width: 992px) {
+            .offcanvas-lg {
+                position: static !important;
+                visibility: visible !important;
+                background-color: var(--bs-dark) !important;
+                border: none !important;
+                transform: none !important;
+            }
 
-    .offcanvas-body::-webkit-scrollbar {
-        width: 6px;
-    }
+            .btn-close {
+                display: none !important;
+            }
+        }
 
-    .offcanvas-body::-webkit-scrollbar-track {
-        background: transparent;
-    }
+        /* Para tablets y móviles - mostrar botón de cierre */
+        @media (max-width: 991.98px) {
+            .offcanvas-start {
+                transform: translateX(-100%);
+                transition: transform 0.3s ease-in-out;
+            }
 
-    .offcanvas-body::-webkit-scrollbar-thumb {
-        background-color: rgba(255, 255, 255, .3);
-        border-radius: 3px;
-    }
-</style>
+            .offcanvas-start.show {
+                transform: translateX(0);
+            }
+
+            .btn-close {
+                display: block !important;
+            }
+        }
+
+        /* Mejoras visuales */
+        .btn:hover {
+            transform: translateY(-1px);
+            transition: transform 0.15s ease-in-out;
+        }
+
+        /* Scroll personalizado */
+        .offcanvas-body {
+            scrollbar-width: thin;
+            scrollbar-color: rgba(255, 255, 255, 0.3) transparent;
+        }
+
+        .offcanvas-body::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .offcanvas-body::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .offcanvas-body::-webkit-scrollbar-thumb {
+            background-color: rgba(255, 255, 255, 0.3);
+            border-radius: 3px;
+        }
+    </style>
 {% endblock %}

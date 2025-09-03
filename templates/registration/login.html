@@ -2,162 +2,153 @@
 {% block title %}Iniciar Sesión - {{ company.company_name }}{% endblock %}
 {% block content %}
     <div class="container-fluid min-vh-100 d-flex">
-        <div class="col-lg-7 d-none d-lg-flex bg-primary position-relative overflow-hidden">
-            <div class="d-flex flex-column justify-content-center align-items-center text-white p-5 position-relative z-1">
-                <div class="text-center">
-                    <i class="bi bi-bank2 display-1 mb-4"></i>
-                    <h1 class="display-5 fw-bold mb-3">Bienvenido a {{ company.company_name }}</h1>
-                    <p class="lead mb-4">Tu plataforma financiera de confianza</p>
-                    <div class="row text-center">
-                        <div class="col-4">
-                            <i class="bi bi-shield-check fs-1 mb-2"></i>
-                            <p class="small">Seguro</p>
-                        </div>
-                        <div class="col-4">
-                            <i class="bi bi-clock fs-1 mb-2"></i>
-                            <p class="small">24/7</p>
-                        </div>
-                        <div class="col-4">
-                            <i class="bi bi-people fs-1 mb-2"></i>
-                            <p class="small">Confiable</p>
+        <div class="row flex-grow-1 w-100">
+            <div class="col-12 col-lg-7 d-none d-lg-flex bg-primary position-relative overflow-hidden">
+                <div class="d-flex flex-column justify-content-center align-items-center text-white p-5 position-relative z-1 w-100">
+                    <div class="text-center mx-auto" style="max-width: 560px;"><i
+                            class="bi bi-bank2 display-1 mb-4"></i>
+                        <h1 class="display-5 fw-bold mb-3">Bienvenido a {{ company.company_name }}</h1>
+                        <p class="lead mb-4">Tu plataforma financiera de confianza</p>
+                        <div class="row text-center g-4">
+                            <div class="col-4"><i class="bi bi-shield-check fs-1 mb-2"></i>
+                                <p class="small mb-0">Seguro</p></div>
+                            <div class="col-4"><i class="bi bi-clock fs-1 mb-2"></i>
+                                <p class="small mb-0">24/7</p></div>
+                            <div class="col-4"><i class="bi bi-people fs-1 mb-2"></i>
+                                <p class="small mb-0">Confiable</p></div>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
-        <div class="col-lg-5 d-flex align-items-center justify-content-center p-4">
-            <div class="w-100" style="max-width: 400px;">
-                <!-- Logo para móviles -->
-                <div class="text-center d-lg-none mb-4">
-                    <i class="bi bi-bank2 text-primary fs-1 mb-2"></i>
-                    <h2 class="text-primary fw-bold">{{ company.company_name }}</h2>
-                </div>
 
-                <div class="card border-0 shadow-lg">
-                    <div class="card-body p-5">
-                        <div class="text-center mb-4">
-                            {% if company.logo_url %}
-                                <img src="{{ company.logo_url }}" alt="Logo de {{ company.company_name }}" width="64"
-                                     height="64"
-                                     class="rounded-circle object-fit-cover mb-3">
-                            {% else %}
-                                <i class="bi bi-person-circle text-primary fs-1 mb-3"></i>
-                            {% endif %}
-                            <h2 class="card-title fw-bold text-dark mb-1">{{ company.company_name }}</h2>
-                            <p class="text-muted small">Accede a tu cuenta de forma segura</p>
-                        </div>
-
-                        {% if form.non_field_errors %}
-                            <div class="alert alert-danger border-0 rounded-3 py-3 mb-4">
-                                <div class="d-flex align-items-center">
-                                    <i class="bi bi-exclamation-triangle-fill me-2"></i>
-                                    <div>
-                                        {% for error in form.non_field_errors %}
-                                            <p class="mb-0 small">{{ error }}</p>
-                                        {% endfor %}
+            <div class="col-12 col-lg-5 d-flex align-items-center justify-content-center p-4">
+                <div class="w-100" style="max-width: 420px;">
+                    <div class="card border-0 shadow-lg rounded-4">
+                        <div class="card-body p-4 p-sm-5">
+                            <div class="text-center mb-4">
+                                {% if company.logo_url %}
+                                    <img src="{{ company.logo_url }}"
+                                         alt="Logo de {{ company.company_name }}"
+                                         width="64" height="64"
+                                         class="rounded-circle object-fit-cover img-fluid mb-3"
+                                         loading="lazy" decoding="async">
+                                {% else %}
+                                    <i class="bi bi-person-circle text-primary fs-1 mb-3"></i>
+                                {% endif %}
+                                <h2 class="card-title fw-bold text-dark mb-1">{{ company.company_name }}</h2>
+                                <p class="text-muted small mb-0">Accede a tu cuenta de forma segura</p>
+                            </div>
+                            {% if form.non_field_errors %}
+                                <div class="alert alert-danger border-0 rounded-3 py-3 mb-4">
+                                    <div class="d-flex align-items-start">
+                                        <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                                        <div>
+                                            {% for error in form.non_field_errors %}
+                                                <p class="mb-0 small">{{ error }}</p>
+                                            {% endfor %}
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-                        {% endif %}
+                            {% endif %}
+                            <form method="post" action="{% url 'users:login' %}" novalidate>
+                                {% csrf_token %}
 
-                        <form method="post" action="{% url 'users:login' %}">
-                            {% csrf_token %}
-
-                            <div class="mb-4">
-                                <label for="id_username" class="form-label fw-semibold">
-                                    <i class="bi bi-person me-2 text-primary"></i>Usuario
-                                </label>
-                                <div class="input-group">
-                                    <span class="input-group-text bg-light border-end-0">
-                                        <i class="bi bi-person text-muted"></i>
-                                    </span>
-                                    <input type="text" name="username" class="form-control border-start-0 ps-0"
-                                           id="id_username" placeholder="Ingresa tu usuario" required>
+                                <div class="mb-4">
+                                    <label for="id_username" class="form-label fw-semibold">
+                                        <i class="bi bi-person me-2 text-primary"></i>Usuario
+                                    </label>
+                                    <div class="input-group">
+                                        <span class="input-group-text bg-light">
+                                            <i class="bi bi-person text-muted"></i>
+                                        </span>
+                                        <input
+                                                type="text"
+                                                name="username"
+                                                id="id_username"
+                                                class="form-control"
+                                                placeholder="Ingresa tu usuario"
+                                                required
+                                                autocomplete="username">
+                                    </div>
                                 </div>
-                            </div>
 
-                            <div class="mb-4">
-                                <label for="id_password" class="form-label fw-semibold">
-                                    <i class="bi bi-lock me-2 text-primary"></i>Contraseña
-                                </label>
-                                <div class="input-group">
-                                    <span class="input-group-text bg-light border-end-0"><i
-                                            class="bi bi-lock text-muted"></i></span>
-                                    <input type="password" name="password" class="form-control border-start-0 ps-0"
-                                           id="id_password" placeholder="Ingresa tu contraseña" required>
-                                    <button class="btn btn-outline-secondary border-start-0" type="button"
-                                            onclick="togglePassword()" id="togglePasswordBtn">
-                                        <i class="bi bi-eye" id="togglePasswordIcon"></i>
+                                <div class="mb-4">
+                                    <label for="id_password" class="form-label fw-semibold">
+                                        <i class="bi bi-lock me-2 text-primary"></i>Contraseña
+                                    </label>
+                                    <div class="input-group">
+                                        <span class="input-group-text bg-light">
+                                            <i class="bi bi-lock text-muted"></i>
+                                        </span>
+                                        <input
+                                                type="password"
+                                                name="password"
+                                                id="id_password"
+                                                class="form-control"
+                                                placeholder="Ingresa tu contraseña"
+                                                required
+                                                autocomplete="current-password">
+                                        <button
+                                                class="btn btn-outline-secondary"
+                                                type="button"
+                                                onclick="togglePassword()"
+                                                id="togglePasswordBtn"
+                                                aria-label="Mostrar u ocultar contraseña"
+                                                aria-pressed="false">
+                                            <i class="bi bi-eye" id="togglePasswordIcon" aria-hidden="true"></i>
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div class="d-flex justify-content-between align-items-center mb-4">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="rememberMe" name="remember">
+                                        <label class="form-check-label small text-muted" for="rememberMe">
+                                            Recordarme
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <div class="d-grid">
+                                    <button type="submit" class="btn btn-primary btn-lg rounded-3 py-3">
+                                        <i class="bi bi-box-arrow-in-right me-2"></i>Ingresar
                                     </button>
                                 </div>
+                            </form>
+
+                            <hr class="my-4">
+
+                            <div class="text-center">
+                                <p class="text-muted small mb-0">
+                                    <i class="bi bi-shield-lock me-2"></i>
+                                    Conexión segura y cifrada
+                                </p>
                             </div>
-
-                            <div class="d-flex justify-content-between align-items-center mb-4">
-                                <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" id="rememberMe">
-                                    <label class="form-check-label small text-muted" for="rememberMe">
-                                        Recordarme
-                                    </label>
-                                </div>
-                                <a href="#" class="text-decoration-none small">
-                                    <i class="bi bi-question-circle me-1"></i>¿Olvidaste tu contraseña?
-                                </a>
-                            </div>
-
-                            <div class="d-grid">
-                                <button type="submit" class="btn btn-primary btn-lg rounded-3 py-3">
-                                    <i class="bi bi-box-arrow-in-right me-2"></i>Ingresar
-                                </button>
-                            </div>
-                        </form>
-
-                        <hr class="my-4">
-
-                        <div class="text-center">
-                            <p class="text-muted small mb-3">
-                                <i class="bi bi-shield-lock me-2"></i>
-                                Conexión segura y cifrada
-                            </p>
                         </div>
                     </div>
+
                 </div>
             </div>
         </div>
     </div>
-
-    <script>
-        function togglePassword() {
-            const passwordInput = document.getElementById('id_password');
-            const toggleIcon = document.getElementById('togglePasswordIcon');
-
-            if (passwordInput.type === 'password') {
-                passwordInput.type = 'text';
-                toggleIcon.classList.remove('bi-eye');
-                toggleIcon.classList.add('bi-eye-slash');
-            } else {
-                passwordInput.type = 'password';
-                toggleIcon.classList.remove('bi-eye-slash');
-                toggleIcon.classList.add('bi-eye');
-            }
-        }
-    </script>
-
+    <script> function togglePassword() {
+        const passwordInput = document.getElementById('id_password');
+        const toggleIcon = document.getElementById('togglePasswordIcon');
+        const toggleBtn = document.getElementById('togglePasswordBtn');
+        const isHidden = passwordInput.type === 'password';
+        passwordInput.type = isHidden ? 'text' : 'password';
+        toggleIcon.classList.toggle('bi-eye', !isHidden);
+        toggleIcon.classList.toggle('bi-eye-slash', isHidden);
+        toggleBtn.setAttribute('aria-pressed', String(isHidden));
+    } </script>
     <style>
-        * {
-            box-sizing: border-box;
+        .card.rounded-4 {
+            border-radius: 1rem;
         }
 
         .form-control:focus {
             border-color: #0d6efd;
-            box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.15);
-        }
-
-        .input-group-text {
-            border-color: #dee2e6;
-        }
-
-        .card {
-            border-radius: 1rem;
+            box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, .15);
         }
 
         .btn-primary {
@@ -171,10 +162,7 @@
             transform: translateY(-1px);
         }
 
-        .shadow-lg {
-            box-shadow: 0 1rem 3rem rgba(0, 0, 0, 0.175) !important;
-        }
-
+        /* Optimización para pantallas pequeñas */
         @media (max-width: 575.98px) {
             .container-fluid {
                 padding: 0;
@@ -183,239 +171,24 @@
             .card-body {
                 padding: 2rem !important;
             }
-
-            .display-5 {
-                font-size: 1.5rem !important;
-            }
-
-            .lead {
-                font-size: 1rem !important;
-            }
-
-            .fs-1 {
-                font-size: 1.5rem !important;
-            }
-
-            .btn-lg {
-                padding: 0.75rem 1rem;
-                font-size: 1rem;
-            }
-
-            @media (max-width: 360px) {
-                .card-body {
-                    padding: 1.5rem !important;
-                }
-
-                .fs-1 {
-                    font-size: 1.25rem !important;
-                }
-
-                h2.card-title {
-                    font-size: 1.25rem;
-                }
-
-                .input-group-text, .form-control {
-                    font-size: 0.9rem;
-                }
-            }
         }
 
-        @media (min-width: 576px) and (max-width: 767.98px) {
+        /* Muy pequeñas (independiente, no anidar) */
+        @media (max-width: 360px) {
             .card-body {
-                padding: 3rem !important;
+                padding: 1.5rem !important;
             }
 
-            .w-100 {
-                max-width: 450px !important;
-            }
-        }
-
-        @media (min-width: 768px) and (max-width: 991.98px) {
-            .col-lg-7, .col-lg-5 {
-                width: 50% !important;
-                flex: 0 0 50%;
-            }
-
-            .d-lg-none {
-                display: none !important;
-            }
-
-            .d-lg-flex {
-                display: flex !important;
-            }
-
-            .card-body {
-                padding: 3.5rem !important;
-            }
-
-            .display-5 {
-                font-size: 2rem !important;
-            }
-
-            .w-100 {
-                max-width: 380px !important;
-            }
-
-            .bg-primary .d-flex {
-                width: 100% !important;
-                height: 100% !important;
-                justify-content: center !important;
-                align-items: center !important;
-            }
-
-            .bg-primary .text-center {
-                width: 100% !important;
-                max-width: 400px;
-            }
-        }
-
-        @media (min-width: 992px) and (max-width: 1199.98px) {
-            .card-body {
-                padding: 4rem !important;
-            }
-
-            .w-100 {
-                max-width: 420px !important;
-            }
-
-            .display-5 {
-                font-size: 2.25rem !important;
-            }
-
-            .bg-primary .d-flex {
-                width: 100% !important;
-                height: 100% !important;
-                justify-content: center !important;
-                align-items: center !important;
-            }
-
-            .bg-primary .text-center {
-                width: 100% !important;
-                max-width: 450px;
-            }
-        }
-
-        @media (min-width: 1200px) and (max-width: 1399.98px) {
-            .card-body {
-                padding: 4.5rem !important;
-            }
-
-            .w-100 {
-                max-width: 450px !important;
-            }
-
-            .display-5 {
-                font-size: 2.5rem !important;
-            }
-
-            .display-1 {
-                font-size: 4rem !important;
-            }
-
-            .bg-primary .d-flex {
-                width: 100% !important;
-                height: 100% !important;
-                justify-content: center !important;
-                align-items: center !important;
-            }
-
-            .bg-primary .text-center {
-                width: 100% !important;
-                max-width: 500px;
-            }
-        }
-
-        @media (min-width: 1400px) and (max-width: 1919.98px) {
-            .card-body {
-                padding: 5rem !important;
-            }
-
-            .w-100 {
-                max-width: 500px !important;
-            }
-
-            .display-5 {
-                font-size: 2.75rem !important;
-            }
-
-            .display-1 {
-                font-size: 4.5rem !important;
-            }
-
-            .lead {
-                font-size: 1.35rem !important;
-            }
-
-            .bg-primary .d-flex {
-                width: 100% !important;
-                height: 100% !important;
-                justify-content: center !important;
-                align-items: center !important;
-            }
-
-            .bg-primary .text-center {
-                width: 100% !important;
-                max-width: 600px;
-            }
-        }
-
-        @media (min-width: 1920px) {
-            .container-fluid {
-                max-width: 2560px;
-                margin: 0 auto;
-            }
-
-            .card-body {
-                padding: 6rem !important;
-            }
-
-            .w-100 {
-                max-width: 600px !important;
-            }
-
-            .display-5 {
-                font-size: 3.5rem !important;
-            }
-
-            .display-1 {
-                font-size: 6rem !important;
-            }
-
-            .lead {
-                font-size: 1.5rem !important;
-            }
-
-            .fs-1 {
-                font-size: 3rem !important;
-            }
-
-            .btn-lg {
-                padding: 1rem 2rem;
+            h2.card-title {
                 font-size: 1.25rem;
             }
 
-            .form-control, .input-group-text {
-                font-size: 1.1rem;
-                padding: 0.75rem 1rem;
-            }
-
-            .card {
-                border-radius: 1.5rem;
-            }
-
-            .bg-primary .d-flex {
-                width: 100% !important;
-                height: 100% !important;
-                justify-content: center !important;
-                align-items: center !important;
-            }
-
-            .bg-primary .text-center {
-                width: 100% !important;
-                max-width: 700px;
+            .input-group-text, .form-control {
+                font-size: .95rem;
             }
         }
 
+        /* Landscape bajo */
         @media (max-height: 500px) and (orientation: landscape) {
             .min-vh-100 {
                 min-height: auto;
@@ -425,41 +198,13 @@
                 padding: 1.5rem !important;
             }
 
-            .fs-1 {
-                font-size: 1.25rem !important;
-            }
-
             .mb-4 {
                 margin-bottom: 1rem !important;
             }
 
             .mb-3 {
-                margin-bottom: 0.75rem !important;
+                margin-bottom: .75rem !important;
             }
-        }
+        } </style>
 
-        @media (min-width: 1400px) {
-            .form-control:focus {
-                box-shadow: 0 0 0 0.3rem rgba(13, 110, 253, 0.25);
-            }
-
-            .btn:focus {
-                box-shadow: 0 0 0 0.3rem rgba(13, 110, 253, 0.25);
-            }
-        }
-
-        @media (min-width: 768px) and (max-width: 1024px) and (orientation: portrait) {
-            .d-lg-flex {
-                display: none !important;
-            }
-
-            .d-lg-none {
-                display: block !important;
-            }
-
-            .col-lg-5 {
-                width: 100% !important;
-            }
-        }
-    </style>
 {% endblock %}

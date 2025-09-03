@@ -1,27 +1,37 @@
 {% if is_paginated %}
-    <nav aria-label="Paginación" class="mt-4">
-        <ul class="pagination justify-content-center">
-            {% if page_obj.has_previous %}
-                <li class="page-item">
-                    <a class="page-link" href="?page=
-                            {{ page_obj.previous_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}">Anterior</a>
-                </li>
-            {% else %}
-                <li class="page-item disabled"><span class="page-link">Anterior</span></li>
-            {% endif %}
+  <nav aria-label="Paginación de usuarios" class="my-2">
+    <ul class="pagination pagination-sm justify-content-center mb-0">
+      {% if page_obj.has_previous %}
+        <li class="page-item">
+          <a class="page-link"
+             rel="prev"
+             href="?page={{ page_obj.previous_page_number }}{% if request.GET.q %}&q={{ request.GET.q|urlencode }}{% endif %}">
+            Anterior
+          </a>
+        </li>
+      {% else %}
+        <li class="page-item disabled" aria-disabled="true">
+          <span class="page-link">Anterior</span>
+        </li>
+      {% endif %}
 
-            <li class="page-item active" aria-current="page">
-                <span class="page-link">Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span>
-            </li>
+      <li class="page-item active" aria-current="page">
+        <span class="page-link">Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span>
+      </li>
 
-            {% if page_obj.has_next %}
-                <li class="page-item">
-                    <a class="page-link" href="?page=
-                            {{ page_obj.next_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}">Siguiente</a>
-                </li>
-            {% else %}
-                <li class="page-item disabled"><span class="page-link">Siguiente</span></li>
-            {% endif %}
-        </ul>
-    </nav>
+      {% if page_obj.has_next %}
+        <li class="page-item">
+          <a class="page-link"
+             rel="next"
+             href="?page={{ page_obj.next_page_number }}{% if request.GET.q %}&q={{ request.GET.q|urlencode }}{% endif %}">
+            Siguiente
+          </a>
+        </li>
+      {% else %}
+        <li class="page-item disabled" aria-disabled="true">
+          <span class="page-link">Siguiente</span>
+        </li>
+      {% endif %}
+    </ul>
+  </nav>
 {% endif %}

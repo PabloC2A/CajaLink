@@ -3,106 +3,118 @@
 {% block title %}Dashboard Staff - {{ company.company_name }}{% endblock %}
 
 {% block main_content %}
-    <h1 class="h2 border-bottom pb-2 mb-3">Dashboard</h1>
+<h1 class="h2 border-bottom pb-2 mb-3">Dashboard</h1>
 
-    <div class="row g-4">
-        <div class="col-md-6">
-            <div class="card text-center h-100 shadow-sm">
-                <div class="card-header"><i class="bi bi-people-fill me-2"></i>Usuarios Totales</div>
-                <div class="card-body">
-                    <h2 class="card-title">{{ total_web_users }}</h2>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-6">
-            <div class="card text-center h-100 shadow-sm">
-                <div class="card-header"><i class="bi bi-link-45deg me-2"></i>Socios Vinculados a la Web</div>
-                <div class="card-body">
-                    <h2 class="card-title">{{ linked_socios }}</h2>
-                </div>
-            </div>
-        </div>
-
-        <!-- Nueva sección del Simulador de Créditos para Staff -->
-        <div class="col-12">
-            <div class="card shadow-sm">
-                <div class="card-header d-flex justify-content-between align-items-center">
-                    <span><i class="bi bi-calculator me-2"></i>Simulador de Créditos</span>
-                    <a href="{% url 'credit_simulator:staff_dashboard' %}" class="btn btn-sm btn-outline-primary">
-                        <i class="bi bi-gear-fill me-1"></i>Panel Completo
-                    </a>
-                </div>
-                <div class="card-body">
-                    <div class="row g-3">
-                        <div class="col-md-3">
-                            <div class="text-center">
-                                <div class="h4 text-primary mb-1">{{ simulator_stats.total_products|default:0 }}</div>
-                                <small class="text-muted">Productos Totales</small>
-                            </div>
-                        </div>
-                        <div class="col-md-3">
-                            <div class="text-center">
-                                <div class="h4 text-success mb-1">{{ simulator_stats.active_products|default:0 }}</div>
-                                <small class="text-muted">Productos Activos</small>
-                            </div>
-                        </div>
-                        <div class="col-md-3">
-                            <div class="text-center">
-                                <div class="h4 text-info mb-1">{{ simulator_stats.total_simulations|default:0 }}</div>
-                                <small class="text-muted">Simulaciones Totales</small>
-                            </div>
-                        </div>
-                        <div class="col-md-3">
-                            <div class="text-center">
-                                <div class="h4 text-warning mb-1">{{ simulator_stats.recent_simulations|default:0 }}</div>
-                                <small class="text-muted">Simulaciones Hoy</small>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="row mt-3">
-                        <div class="col-md-6">
-                            <a href="{% url 'credit_simulator:staff_product_list' %}" class="btn btn-primary w-100">
-                                <i class="bi bi-list-ul me-2"></i>Gestionar Productos
-                            </a>
-                        </div>
-                        <div class="col-md-6">
-                            <a href="{% url 'credit_simulator:staff_reports' %}" class="btn btn-secondary w-100">
-                                <i class="bi bi-bar-chart-line me-2"></i>Ver Reportes
-                            </a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-12">
-            <div class="card shadow-sm">
-                <div class="card-header"><i class="bi bi-arrow-down-up me-2"></i>Últimas 5 Transacciones del Sistema
-                </div>
-                <div class="card-body p-0">
-                    <ul class="list-group list-group-flush">
-                        {% for tx in last_5_transactions %}
-                            <li class="list-group-item d-flex justify-content-between align-items-center">
-                                <div>
-                                    <strong>{{ tx.description }}</strong>
-                                    <small class="d-block text-muted">
-                                        Socio: {{ tx.account.socio.nombres }} {{ tx.account.socio.apellidos }} |
-                                        Cuenta: {{ tx.account.account_number }}
-                                    </small>
-                                </div>
-                                <span class="badge
-                                    {% if tx.flow == tx.FlowType.OUTCOME %} bg-danger-subtle text-danger-emphasis {% else %} bg-success-subtle text-success-emphasis {% endif %}
-                                    rounded-pill fs-6">
-                                    ${{ tx.amount|floatformat:2 }}
-                                </span>
-                            </li>
-                        {% empty %}
-                            <li class="list-group-item text-center p-3">No hay transacciones recientes en el sistema.
-                            </li>
-                        {% endfor %}
-                    </ul>
-                </div>
-            </div>
-        </div>
+<div class="row g-4">
+  <div class="col-md-6">
+    <div class="card text-center h-100 shadow-sm">
+      <div class="card-header">
+        <i class="bi bi-people-fill me-2" aria-hidden="true"></i>Usuarios Totales
+      </div>
+      <div class="card-body">
+        <h2 class="card-title">{{ total_web_users }}</h2>
+      </div>
     </div>
+  </div>
+
+  <div class="col-md-6">
+    <div class="card text-center h-100 shadow-sm">
+      <div class="card-header">
+        <i class="bi bi-link-45deg me-2" aria-hidden="true"></i>Socios Vinculados a la Web
+      </div>
+      <div class="card-body">
+        <h2 class="card-title">{{ linked_socios }}</h2>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-12">
+    <div class="card shadow-sm">
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <span><i class="bi bi-calculator me-2" aria-hidden="true"></i>Simulador de Créditos</span>
+        <a href="{% url 'credit_simulator:staff_dashboard' %}" class="btn btn-sm btn-outline-primary" aria-label="Abrir panel completo del simulador de créditos">
+          <i class="bi bi-gear-fill me-1" aria-hidden="true"></i>Panel Completo
+        </a>
+      </div>
+      <div class="card-body">
+        <div class="row g-3">
+          <div class="col-6 col-md-3">
+            <div class="text-center">
+              <div class="h4 text-primary mb-1">{{ simulator_stats.total_products|default:0 }}</div>
+              <small class="text-muted">Productos Totales</small>
+            </div>
+          </div>
+          <div class="col-6 col-md-3">
+            <div class="text-center">
+              <div class="h4 text-success mb-1">{{ simulator_stats.active_products|default:0 }}</div>
+              <small class="text-muted">Productos Activos</small>
+            </div>
+          </div>
+          <div class="col-6 col-md-3">
+            <div class="text-center">
+              <div class="h4 text-info mb-1">{{ simulator_stats.total_simulations|default:0 }}</div>
+              <small class="text-muted">Simulaciones Totales</small>
+            </div>
+          </div>
+          <div class="col-6 col-md-3">
+            <div class="text-center">
+              <div class="h4 text-warning mb-1">{{ simulator_stats.recent_simulations|default:0 }}</div>
+              <small class="text-muted">Simulaciones Hoy</small>
+            </div>
+          </div>
+        </div>
+
+        <div class="row mt-3 g-3">
+          <div class="col-md-6">
+            <a href="{% url 'credit_simulator:staff_product_list' %}" class="btn btn-primary w-100" aria-label="Gestionar productos del simulador de créditos">
+              <i class="bi bi-list-ul me-2" aria-hidden="true"></i>Gestionar Productos
+            </a>
+          </div>
+          <div class="col-md-6">
+            <a href="{% url 'credit_simulator:staff_reports' %}" class="btn btn-secondary w-100" aria-label="Ver reportes del simulador de créditos">
+              <i class="bi bi-bar-chart-line me-2" aria-hidden="true"></i>Ver Reportes
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-12">
+    <div class="card shadow-sm">
+      <div class="card-header">
+        <i class="bi bi-arrow-down-up me-2" aria-hidden="true"></i>Últimas 5 Transacciones del Sistema
+      </div>
+      <div class="card-body p-0">
+        <ul class="list-group list-group-flush">
+          {% for tx in last_5_transactions %}
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+              <div class="me-3 flex-grow-1">
+                <strong class="d-block text-truncate">{{ tx.description }}</strong>
+                <small class="d-block text-muted text-truncate">
+                  Socio: {{ tx.account.socio.nombres }} {{ tx.account.socio.apellidos }} |
+                  Cuenta: {{ tx.account.account_number }}
+                </small>
+              </div>
+              <span class="badge
+                {% if tx.flow == tx.FlowType.OUTCOME %} bg-danger-subtle text-danger-emphasis {% else %} bg-success-subtle text-success-emphasis {% endif %}
+                rounded-pill fs-6">
+                {% if tx.flow == tx.FlowType.OUTCOME %}
+                  <i class="bi bi-arrow-down-circle me-1" aria-hidden="true"></i>
+                  <span class="visually-hidden">Egreso:</span>
+                {% else %}
+                  <i class="bi bi-arrow-up-circle me-1" aria-hidden="true"></i>
+                  <span class="visually-hidden">Ingreso:</span>
+                {% endif %}
+                ${{ tx.amount|floatformat:2 }}
+              </span>
+            </li>
+          {% empty %}
+            <li class="list-group-item text-center p-3">No hay transacciones recientes en el sistema.</li>
+          {% endfor %}
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
 {% endblock %}

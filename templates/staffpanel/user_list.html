@@ -1,165 +1,175 @@
-    {% extends "layouts/base_staff.html" %}
+{% extends "layouts/base_staff.html" %}
+{% block title %}Usuarios - {{ company.company_name }}{% endblock %}
 
-    {% block title %}Usuarios - {{ company.company_name }}{% endblock %}
+{% block main_content %}
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+  <h1 class="h2">
+    <i class="bi bi-people me-2" aria-hidden="true"></i>
+    Gestión de Usuarios Web
+  </h1>
+</div>
 
-    {% block main_content %}
-        <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-            <h1 class="h2"><i class="bi bi-people me-2"></i>Gestión de Usuarios Web</h1>
+{# Alerts accesibles (opcional: aria-live en contenedor) #}
+{% if messages %}
+  <div aria-live="polite">
+    {% for message in messages %}
+      <div class="alert alert-{% if 'error' in message.tags %}danger{% elif 'warning' in message.tags %}warning{% else %}success{% endif %} alert-dismissible fade show" role="alert">
+        {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
+      </div>
+    {% endfor %}
+  </div>
+{% endif %}
+
+<div class="card shadow-sm">
+  <div class="card-body">
+
+    {# 🔎 Barra de búsqueda #}
+    <form method="get" class="row g-2 mb-3" role="search">
+      <div class="col-md-8 col-lg-6">
+        <label for="id_q" class="visually-hidden">Buscar</label>
+        <div class="input-group">
+          <span class="input-group-text bg-white" id="q-addon">
+            <i class="bi bi-search" aria-hidden="true"></i>
+          </span>
+          <input
+            type="text"
+            id="id_q"
+            name="q"
+            value="{{ request.GET.q|default_if_none:'' }}"
+            class="form-control"
+            placeholder="Buscar por nombre, cédula o email..."
+            aria-describedby="q-addon">
         </div>
-
-        {% if messages %}
-            {% for message in messages %}
-                <div class="alert alert-{% if message.tags == 'error' %}danger{% elif message.tags == 'warning' %}warning{% else %}success{% endif %} alert-dismissible fade show"
-                     role="alert">
-                    {{ message }}
-                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                </div>
-            {% endfor %}
-        {% endif %}
-
-        <div class="card shadow-sm">
-            <div class="card-body">
-
-                <!-- 🔎 Barra de búsqueda -->
-                <form method="get" class="row g-2 mb-3">
-                    <div class="col-md-8 col-lg-6">
-                        <div class="input-group">
-                            <span class="input-group-text bg-white"><i class="bi bi-search"></i></span>
-                            <input type="text" name="q" value="{{ request.GET.q }}" class="form-control"
-                                   placeholder="Buscar por nombre, cédula o email...">
-                        </div>
-                    </div>
-                    <div class="col-auto">
-                        <button type="submit" class="btn btn-primary">
-                            <i class="bi bi-search"></i> Buscar
-                        </button>
-                    </div>
-                    {% if request.GET.q %}
-                        <div class="col-auto">
-                            <a href="{% url 'staffpanel:user_list' %}" class="btn btn-outline-secondary">
-                                <i class="bi bi-x-circle"></i> Limpiar
-                            </a>
-                        </div>
-                    {% endif %}
-                </form>
-
-                <!-- 📋 Tabla unificada de socios -->
-                <div class="table-responsive" style="max-height: 70vh; overflow-y: auto;">
-                    <table class="table table-hover align-middle mb-0">
-                        <thead class="table-light position-sticky" style="top: 0; z-index: 10;">
-                        <tr>
-                            <th>Estado Vinculación</th>
-                            <th>Nombre Completo</th>
-                            <th>Cédula</th>
-                            <th>Usuario Web</th>
-                            <th>Email</th>
-                            <th>Estado</th>
-                            <th class="text-center">Acciones</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        {% for socio in unified_list %}
-                            <tr class="{% if socio.is_linked %}table-success-subtle{% else %}table-warning-subtle{% endif %}">
-                                <!-- Estado de vinculación -->
-                                <td>
-                                    {% if socio.is_linked %}
-                                        <span class="badge bg-success-subtle text-success-emphasis">
-                                            <i class="bi bi-link-45deg me-1"></i>Vinculado
-                                        </span>
-                                    {% else %}
-                                        <span class="badge bg-warning-subtle text-warning-emphasis">
-                                            <i class="bi bi-person-plus me-1"></i>Sin Vincular
-                                        </span>
-                                    {% endif %}
-                                </td>
-
-                                <!-- Nombre completo del socio -->
-                                <td><strong>{{ socio.nombres }} {{ socio.apellidos }}</strong></td>
-
-                                <!-- Cédula -->
-                                <td>{{ socio.cedula }}</td>
-
-                                <!-- Usuario web -->
-                                <td>
-                                    {% if socio.is_linked %}
-                                        <code>{{ socio.web_username }}</code>
-                                    {% else %}
-                                        <span class="text-muted">-</span>
-                                    {% endif %}
-                                </td>
-
-                                <!-- Email -->
-                                <td>
-                                    {% if socio.is_linked %}
-                                        {{ socio.web_email|default:"-" }}
-                                    {% else %}
-                                        {{ socio.email|default:"-" }}
-                                    {% endif %}
-                                </td>
-
-                                <!-- Estado del usuario web -->
-                                <td>
-                                    {% if socio.is_linked %}
-                                        {% if socio.web_is_active %}
-                                            <span class="badge bg-success-subtle text-success-emphasis">Activo</span>
-                                        {% else %}
-                                            <span class="badge bg-danger-subtle text-danger-emphasis">Inactivo</span>
-                                        {% endif %}
-                                    {% else %}
-                                        <span class="badge bg-secondary-subtle text-secondary-emphasis">Inactivo</span>
-                                    {% endif %}
-                                </td>
-
-                                <!-- Acciones -->
-                                <td class="text-center">
-                                    {% if socio.is_linked %}
-                                        <!-- Socio ya vinculado - mostrar acciones de usuario -->
-                                        {% if socio.web_is_active %}
-                                            <form action="{% url 'staffpanel:deactivate_user' socio.user_id %}"
-                                                  method="post"
-                                                  class="d-inline">
-                                                {% csrf_token %}
-                                                <button type="submit" class="btn btn-sm btn-outline-danger"
-                                                        title="Desactivar usuario"
-                                                        onclick="return confirm('¿Estás seguro de desactivar este usuario?')">
-                                                    <i class="bi bi-person-x"></i>
-                                                </button>
-                                            </form>
-                                        {% else %}
-                                            <span class="text-muted small">Usuario desactivado</span>
-                                        {% endif %}
-                                    {% else %}
-                                        <!-- Socio sin vincular - mostrar acción de crear usuario -->
-                                        <a href="{% url 'staffpanel:link_socio_create_user' socio.id %}"
-                                           class="btn btn-sm btn-success"
-                                           title="Crear usuario web para este socio">
-                                            <i class="bi bi-person-plus-fill me-1"></i> Crear Usuario
-                                        </a>
-                                    {% endif %}
-                                </td>
-                            </tr>
-                        {% empty %}
-                            <tr>
-                                <td colspan="7" class="text-center p-4">
-                                    {% if request.GET.q %}
-                                        <div class="text-muted">
-                                            <i class="bi bi-search me-2"></i>
-                                            No se encontraron socios que coincidan con "{{ request.GET.q }}"
-                                        </div>
-                                    {% else %}
-                                        <div class="text-muted">
-                                            <i class="bi bi-info-circle me-2"></i>
-                                            No hay socios registrados en el sistema.
-                                        </div>
-                                    {% endif %}
-                                </td>
-                            </tr>
-                        {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
-            </div>
+      </div>
+      <div class="col-auto">
+        <button type="submit" class="btn btn-primary">
+          <i class="bi bi-search me-1" aria-hidden="true"></i>
+          Buscar
+        </button>
+      </div>
+      {% if request.GET.q %}
+        <div class="col-auto">
+          <a href="{% url 'staffpanel:user_list' %}" class="btn btn-outline-secondary">
+            <i class="bi bi-x-circle me-1" aria-hidden="true"></i>
+            Limpiar
+          </a>
         </div>
+      {% endif %}
+    </form>
 
-        {% include "layouts/pagination.html" %}
-    {% endblock %}
+    {# 📋 Tabla #}
+    <div class="table-responsive position-relative" style="max-height: 70vh; overflow-y: auto;">
+      <table class="table table-hover align-middle mb-0">
+        <caption class="visually-hidden">Listado de usuarios web</caption>
+        <thead class="table-light sticky-top z-1">
+          <tr>
+            <th scope="col">Estado Vinculación</th>
+            <th scope="col">Nombre Completo</th>
+            <th scope="col">Cédula</th>
+            <th scope="col">Usuario Web</th>
+            <th scope="col">Email</th>
+            <th scope="col">Estado</th>
+            <th scope="col" class="text-center">Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for socio in unified_list %}
+            <tr class="{% if socio.is_linked %}table-success{% else %}table-warning{% endif %}">
+              <td>
+                {% if socio.is_linked %}
+                  <span class="badge bg-success-subtle text-success-emphasis">
+                    <i class="bi bi-link-45deg me-1" aria-hidden="true"></i>Vinculado
+                  </span>
+                {% else %}
+                  <span class="badge bg-warning-subtle text-warning-emphasis">
+                    <i class="bi bi-person-plus me-1" aria-hidden="true"></i>Sin Vincular
+                  </span>
+                {% endif %}
+              </td>
+
+              <td><strong>{{ socio.nombres }} {{ socio.apellidos }}</strong></td>
+              <td>{{ socio.cedula }}</td>
+
+              <td>
+                {% if socio.is_linked %}
+                  <span class="font-monospace user-select-all">{{ socio.web_username }}</span>
+                {% else %}
+                  <span class="text-muted">-</span>
+                {% endif %}
+              </td>
+
+              <td class="text-break">
+                {% if socio.is_linked %}
+                  {{ socio.web_email|default:"-" }}
+                {% else %}
+                  {{ socio.email|default:"-" }}
+                {% endif %}
+              </td>
+
+              <td>
+                {% if socio.is_linked %}
+                  {% if socio.web_is_active %}
+                    <span class="badge bg-success-subtle text-success-emphasis">Activo</span>
+                  {% else %}
+                    <span class="badge bg-danger-subtle text-danger-emphasis">Inactivo</span>
+                  {% endif %}
+                {% else %}
+                  <span class="badge bg-secondary-subtle text-secondary-emphasis">Inactivo</span>
+                {% endif %}
+              </td>
+
+              <td class="text-center">
+                {% if socio.is_linked %}
+                  {% if socio.web_is_active %}
+                    <form action="{% url 'staffpanel:deactivate_user' socio.user_id %}" method="post" class="d-inline">
+                      {% csrf_token %}
+                      <button
+                        type="submit"
+                        class="btn btn-sm btn-outline-danger"
+                        title="Desactivar usuario"
+                        onclick="return confirm('¿Estás seguro de desactivar este usuario?')">
+                        <i class="bi bi-person-x" aria-hidden="true"></i>
+                        <span class="visually-hidden">Desactivar usuario</span>
+                      </button>
+                    </form>
+                  {% else %}
+                    <span class="text-muted small">Usuario desactivado</span>
+                  {% endif %}
+                {% else %}
+                  <a href="{% url 'staffpanel:link_socio_create_user' socio.id %}"
+                     class="btn btn-sm btn-success">
+                    <i class="bi bi-person-plus-fill me-1" aria-hidden="true"></i>
+                    Crear Usuario
+                  </a>
+                {% endif %}
+              </td>
+            </tr>
+          {% empty %}
+            <tr>
+              <td colspan="7" class="text-center p-4">
+                {% if request.GET.q %}
+                  <div class="text-muted">
+                    <i class="bi bi-search me-2" aria-hidden="true"></i>
+                    No se encontraron socios que coincidan con "{{ request.GET.q }}"
+                  </div>
+                {% else %}
+                  <div class="text-muted">
+                    <i class="bi bi-info-circle me-2" aria-hidden="true"></i>
+                    No hay socios registrados en el sistema.
+                  </div>
+                {% endif %}
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div> {# /table-responsive #}
+  </div> {# /card-body #}
+
+  {# 👇 Mueve aquí la paginación para que NO altere el alto del contenedor scrollable #}
+  <div class="card-footer bg-body">
+    {% include "layouts/pagination.html" %}
+  </div>
+</div> {# /card #}
+{% endblock %}

@@ -1,181 +1,171 @@
 {% extends "base.html" %}
 
 {% block content %}
-    <div class="d-flex min-vh-100">
-        <!-- Botón hamburguesa para móviles -->
-        <button class="btn btn-dark position-fixed d-lg-none shadow"
-                type="button"
-                data-bs-toggle="offcanvas"
-                data-bs-target="#sidebarMenu"
-                style="top: 1rem; left: 1rem; z-index: 1040;">
-            <i class="bi bi-list fs-5"></i>
+<div class="d-flex min-vh-100">
+    <!-- Botón hamburguesa para móviles -->
+    <button class="btn btn-dark position-fixed d-lg-none shadow" type="button" data-bs-toggle="offcanvas"
+        data-bs-target="#sidebarMenu" style="top: 1rem; left: 1rem; z-index: 1040;">
+        <i class="bi bi-list fs-5"></i>
+    </button>
+
+    <!-- Sidebar -->
+    <div class="offcanvas-lg offcanvas-start d-flex flex-column flex-shrink-0 p-3 text-bg-dark" tabindex="-1"
+        id="sidebarMenu" style="width: 280px; min-height: 100vh;">
+
+        <!-- Header del sidebar -->
+        <a href="{% url 'staffpanel:dashboard' %}"
+            class="d-flex align-items-center mb-3 mb-md-0 me-md-auto text-white text-decoration-none">
+            {% if company.logo_url %}
+            <img src="{{ company.logo_url }}" alt="Logo" width="64" height="64" class="rounded-circle object-fit-cover mb-3">
+            {% else %}
+            <i class="bi bi-building text-white"></i>
+            {% endif %}
+            <span class="fs-4">{{ company.short_name }}</span>
+        </a>
+
+        <!-- Botón de cierre para móviles -->
+        <button type="button" class="btn-close btn-close-white position-absolute" data-bs-dismiss="offcanvas"
+            data-bs-target="#sidebarMenu" aria-label="Close" style="top: 1rem; right: 1rem; display: none;">
         </button>
 
-        <!-- Sidebar -->
-        <div class="offcanvas-lg offcanvas-start d-flex flex-column flex-shrink-0 p-3 text-bg-dark"
-             tabindex="-1"
-             id="sidebarMenu"
-             style="width: 280px; min-height: 100vh;">
+        <hr>
 
-            <!-- Header del sidebar -->
-            <a href="{% url 'staffpanel:dashboard' %}"
-               class="d-flex align-items-center mb-3 mb-md-0 me-md-auto text-white text-decoration-none">
-                <div class="bg-primary rounded d-flex align-items-center justify-content-center me-2"
-                     style="width: 32px; height: 32px;">
-                    <i class="bi bi-building text-white"></i>
-                </div>
-                <span class="fs-4">{{ company.company_name }}</span>
-            </a>
-
-            <!-- Botón de cierre para móviles -->
-            <button type="button"
-                    class="btn-close btn-close-white position-absolute"
-                    data-bs-dismiss="offcanvas"
-                    data-bs-target="#sidebarMenu"
-                    aria-label="Close"
-                    style="top: 1rem; right: 1rem; display: none;">
-            </button>
-
-            <hr>
-
-            <!-- Navegación principal con mb-auto -->
-            <ul class="nav nav-pills flex-column mb-auto">
-                <li class="nav-item">
-                    <a href="{% url 'staffpanel:dashboard' %}"
-                       class="nav-link d-flex align-items-center
+        <!-- Navegación principal con mb-auto -->
+        <ul class="nav nav-pills flex-column mb-auto">
+            <li class="nav-item">
+                <a href="{% url 'staffpanel:dashboard' %}" class="nav-link d-flex align-items-center
                               {% if request.resolver_match.app_name == 'staffpanel' and request.resolver_match.url_name == 'dashboard' %}
                                   active
                               {% else %}
                                   text-white nav-link-hover
-                              {% endif %}"
-                       {% if request.resolver_match.app_name == 'staffpanel' and request.resolver_match.url_name == 'dashboard' %}aria-current="page"{% endif %}>
-                        <i class="bi bi-house-door pe-none me-2"></i>
-                        Dashboard
-                    </a>
-                </li>
+                              {% endif %}" {% if request.resolver_match.app_name=='staffpanel' and
+                    request.resolver_match.url_name=='dashboard' %}aria-current="page" {% endif %}>
+                    <i class="bi bi-house-door pe-none me-2"></i>
+                    Dashboard
+                </a>
+            </li>
 
-                <li>
-                    <a href="{% url 'staffpanel:user_list' %}"
-                       class="nav-link d-flex align-items-center
+            <li>
+                <a href="{% url 'staffpanel:user_list' %}" class="nav-link d-flex align-items-center
                               {% if request.resolver_match.app_name == 'staffpanel' and 'user' in request.resolver_match.url_name %}
                                   active
                               {% else %}
                                   text-white nav-link-hover
-                              {% endif %}"
-                       {% if request.resolver_match.app_name == 'staffpanel' and 'user' in request.resolver_match.url_name %}aria-current="page"{% endif %}>
-                        <i class="bi bi-people pe-none me-2"></i>
-                        Usuarios
-                    </a>
+                              {% endif %}" {% if request.resolver_match.app_name=='staffpanel' and 'user' in
+                    request.resolver_match.url_name %}aria-current="page" {% endif %}>
+                    <i class="bi bi-people pe-none me-2"></i>
+                    Usuarios
+                </a>
+            </li>
+        </ul>
+
+        <hr>
+
+        <!-- Usuario con dropdown -->
+        <div class="dropdown">
+            <a href="#" class="d-flex align-items-center text-white text-decoration-none dropdown-toggle"
+                data-bs-toggle="dropdown" aria-expanded="false">
+                <div class="bg-secondary rounded-circle d-flex align-items-center justify-content-center me-2"
+                    style="width: 32px; height: 32px;">
+                    <i class="bi bi-person-fill text-white"></i>
+                </div>
+                <strong>{{ user.get_full_name|default:"Cristhian Martinez" }}</strong>
+            </a>
+            <ul class="dropdown-menu dropdown-menu-dark text-small shadow">
+                <li><a class="dropdown-item" href="#">Perfil</a></li>
+                <li><a class="dropdown-item" href="#">Configuración</a></li>
+                <li>
+                    <hr class="dropdown-divider">
+                </li>
+                <li>
+                    <form action="{% url 'users:logout' %}" method="post" class="d-inline">
+                        {% csrf_token %}
+                        <button type="submit" class="dropdown-item">Cerrar Sesión</button>
+                    </form>
                 </li>
             </ul>
-
-            <hr>
-
-            <!-- Usuario con dropdown -->
-            <div class="dropdown">
-                <a href="#" class="d-flex align-items-center text-white text-decoration-none dropdown-toggle"
-                   data-bs-toggle="dropdown" aria-expanded="false">
-                    <div class="bg-secondary rounded-circle d-flex align-items-center justify-content-center me-2"
-                         style="width: 32px; height: 32px;">
-                        <i class="bi bi-person-fill text-white"></i>
-                    </div>
-                    <strong>{{ user.get_full_name|default:"Cristhian Martinez" }}</strong>
-                </a>
-                <ul class="dropdown-menu dropdown-menu-dark text-small shadow">
-                    <li><a class="dropdown-item" href="#">Perfil</a></li>
-                    <li><a class="dropdown-item" href="#">Configuración</a></li>
-                    <li>
-                        <hr class="dropdown-divider">
-                    </li>
-                    <li>
-                        <form action="{% url 'users:logout' %}" method="post" class="d-inline">
-                            {% csrf_token %}
-                            <button type="submit" class="dropdown-item">Cerrar Sesión</button>
-                        </form>
-                    </li>
-                </ul>
-            </div>
-        </div>
-
-        <!-- Contenido principal -->
-        <div class="flex-grow-1 d-flex flex-column bg-light">
-            <!-- Espaciador para el botón hamburguesa en móviles -->
-            <div class="d-lg-none" style="height: 4rem;"></div>
-
-            <main class="flex-grow-1 p-4">
-                <div class="container-fluid">
-                    {% block main_content %}{% endblock %}
-                </div>
-            </main>
         </div>
     </div>
 
-    <style>
-        /* Hover effects para navegación */
-        .nav-link-hover:hover {
-            background-color: rgba(255, 255, 255, 0.1) !important;
-            transition: background-color 0.15s ease-in-out;
-        }
+    <!-- Contenido principal -->
+    <div class="flex-grow-1 d-flex flex-column bg-light">
+        <!-- Espaciador para el botón hamburguesa en móviles -->
+        <div class="d-lg-none" style="height: 4rem;"></div>
 
-        /* Asegurar que el sidebar ocupe toda la altura */
+        <main class="flex-grow-1 p-4">
+            <div class="container-fluid">
+                {% block main_content %}{% endblock %}
+            </div>
+        </main>
+    </div>
+</div>
+
+<style>
+    /* Hover effects para navegación */
+    .nav-link-hover:hover {
+        background-color: rgba(255, 255, 255, 0.1) !important;
+        transition: background-color 0.15s ease-in-out;
+    }
+
+    /* Asegurar que el sidebar ocupe toda la altura */
+    .offcanvas-lg {
+        height: 100vh;
+    }
+
+    /* Estilos específicos para diferentes tamaños de pantalla */
+    @media (min-width: 992px) {
         .offcanvas-lg {
-            height: 100vh;
+            position: static !important;
+            visibility: visible !important;
+            background-color: var(--bs-dark) !important;
+            border: none !important;
+            transform: none !important;
         }
 
-        /* Estilos específicos para diferentes tamaños de pantalla */
-        @media (min-width: 992px) {
-            .offcanvas-lg {
-                position: static !important;
-                visibility: visible !important;
-                background-color: var(--bs-dark) !important;
-                border: none !important;
-                transform: none !important;
-            }
+        .btn-close {
+            display: none !important;
+        }
+    }
 
-            .btn-close {
-                display: none !important;
-            }
+    /* Para tablets y móviles - mostrar botón de cierre */
+    @media (max-width: 991.98px) {
+        .offcanvas-start {
+            transform: translateX(-100%);
+            transition: transform 0.3s ease-in-out;
         }
 
-        /* Para tablets y móviles - mostrar botón de cierre */
-        @media (max-width: 991.98px) {
-            .offcanvas-start {
-                transform: translateX(-100%);
-                transition: transform 0.3s ease-in-out;
-            }
-
-            .offcanvas-start.show {
-                transform: translateX(0);
-            }
-
-            .btn-close {
-                display: block !important;
-            }
+        .offcanvas-start.show {
+            transform: translateX(0);
         }
 
-        /* Mejoras visuales */
-        .btn:hover {
-            transform: translateY(-1px);
-            transition: transform 0.15s ease-in-out;
+        .btn-close {
+            display: block !important;
         }
+    }
 
-        /* Scroll personalizado */
-        .offcanvas-body {
-            scrollbar-width: thin;
-            scrollbar-color: rgba(255, 255, 255, 0.3) transparent;
-        }
+    /* Mejoras visuales */
+    .btn:hover {
+        transform: translateY(-1px);
+        transition: transform 0.15s ease-in-out;
+    }
 
-        .offcanvas-body::-webkit-scrollbar {
-            width: 6px;
-        }
+    /* Scroll personalizado */
+    .offcanvas-body {
+        scrollbar-width: thin;
+        scrollbar-color: rgba(255, 255, 255, 0.3) transparent;
+    }
 
-        .offcanvas-body::-webkit-scrollbar-track {
-            background: transparent;
-        }
+    .offcanvas-body::-webkit-scrollbar {
+        width: 6px;
+    }
 
-        .offcanvas-body::-webkit-scrollbar-thumb {
-            background-color: rgba(255, 255, 255, 0.3);
-            border-radius: 3px;
-        }
-    </style>
+    .offcanvas-body::-webkit-scrollbar-track {
+        background: transparent;
+    }
+
+    .offcanvas-body::-webkit-scrollbar-thumb {
+        background-color: rgba(255, 255, 255, 0.3);
+        border-radius: 3px;
+    }
+</style>
 {% endblock %}
